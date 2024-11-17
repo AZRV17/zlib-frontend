@@ -1,25 +1,86 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, {createContext, useState} from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from "./pages/Register";
+import Books from "./pages/Books";
+import BookDetail from "./pages/BookDetail";
+import Auth from "./pages/Auth";
+import UserProfile from "./pages/UserProfile";
+import Favorites from "./pages/Favorites";
+import Header from "./components/Header";
+import ReserveHistory from "./pages/ReserveHistory";
+import AdminAuthorsPage from "./pages/admin_pages/AuthorsAdmin";
+import AdminBooksPage from "./pages/admin_pages/BooksAdmin";
+import AdminGenresPage from "./pages/admin_pages/GenresAdmin";
+import AdminPublishersPage from "./pages/admin_pages/PublishersAdmin";
+import AdminUniqueCodesPage from "./pages/admin_pages/UniqueCodesAdmin";
+import AdminReservationsPage from "./pages/admin_pages/ReservationsAdmin";
+import AuthorFormPage from "./components/forms/AuthorFormPage";
+import BookFormPage from "./components/forms/BookFormPage";
+import GenreFormPage from "./components/forms/GenreFormPage";
+import PublisherFormPage from "./components/forms/PublisherFormPage";
+import UniqueCodeFormPage from "./components/forms/UniqueCodeFormPage";
+import AdminUsersPage from "./pages/admin_pages/UsersAdmin";
+import BackupRestorePage from "./pages/admin_pages/BackupAdmin";
+import AdminLogsPage from "./pages/admin_pages/LogsAdmin";
+
+// Определяем тип контекста с двумя полями: isAuthenticated и setAuth
+export class AuthContextType {
+    isAuthenticated
+    setAuth
+}
+
+// Создаем контекст с типом AuthContextType и начальными значениями по умолчанию
+export const AuthContext = createContext({
+    isAuthenticated: false,
+    setAuth: () => { },
+});
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [isAuth, setIsAuth] = useState(false);
+
+    return (
+        <Router>
+            <AuthContext.Provider value={{isAuth, setIsAuth}}>
+                <Header/>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Register />}/>
+                    <Route path="/books" element={<Books />}/>
+                    <Route path="books/:id" element={<BookDetail />}/>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/favorites" element={<Favorites />} />
+                    <Route path="/reservations" element={<ReserveHistory />} />
+                    <Route path="/admin/authors" element={<AdminAuthorsPage />} />
+                    <Route path="/admin/books" element={<AdminBooksPage />} />
+                    <Route path="/admin/genres" element={<AdminGenresPage />} />
+                    <Route path="/admin/publishers" element={<AdminPublishersPage />} />
+                    <Route path="/admin/unique-codes" element={<AdminUniqueCodesPage />} />
+                    <Route path="/admin/reservations" element={<AdminReservationsPage />} />
+                    <Route path="/admin/logs" element={<AdminLogsPage />} />
+                    <Route path="/admin/users" element={<AdminUsersPage />} />
+                    <Route path="/admin/authors/new" element={<AuthorFormPage />} />
+                    <Route path="/admin/authors/edit/:id" element={<AuthorFormPage />} />
+                    <Route path="/admin/books/new" element={<BookFormPage />} />
+                    <Route path="/admin/books/edit/:id" element={<BookFormPage />} />
+                    <Route path="/admin/genres/new" element={<GenreFormPage />} />
+                    <Route path="/admin/genres/edit/:id" element={<GenreFormPage />} />
+                    <Route path="/admin/publishers/new" element={<PublisherFormPage />} />
+                    <Route path="/admin/publishers/edit/:id" element={<PublisherFormPage />} />
+                    <Route path="/admin/unique-codes/new" element={<UniqueCodeFormPage />} />
+                    <Route path="/admin/unique-codes/edit/:id" element={<UniqueCodeFormPage />} />
+                    <Route path="/admin/backup" element={<BackupRestorePage />} />
+                    {/*<Route element={<PrivateRoute />}>*/}
+
+                    {/*</Route>*/}
+                </Routes>
+            </AuthContext.Provider>
+        </Router>
+    );
 }
 
 export default App;

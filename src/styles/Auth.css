@@ -1,0 +1,35 @@
+/* src/pages/Auth.css */
+
+.auth-container {
+    width: 80%;
+    max-width: 800px;
+    margin: auto;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-wrapper {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.form-content {
+    width: 50%; /* Логин и регистрация занимают по 50% */
+    padding: 2rem;
+}
+
+.image-content {
+    width: 50%; /* Картинка занимает 50% ширины */
+    cursor: pointer; /* Указываем, что картинка кликабельная */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Цвет фона для картинки */
+}
+
+.image-content img {
+    max-width: 100%;
+    height: auto; /* Обеспечиваем адаптивность изображения */
+}
