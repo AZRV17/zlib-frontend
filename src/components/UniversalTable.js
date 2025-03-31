@@ -68,141 +68,193 @@ const UniversalTable = ({ data, headers, onCreate, onEdit, onDelete, isReservati
         }
     }, [data, searchTerm]);
 
-    return (
-        <div className="w-full bg-white rounded-lg shadow-md p-6">
-            <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Таблица данных</h2>
+    // Вспомогательные функции для рендеринга действий
+    const renderActions = (row) => {
+        if (isReservation) {
+            return (
+                <button
+                    onClick={() => onEdit(row["id"])}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                >
+                    <Edit2 className="h-4 w-4" />
+                    <span>Изменить статус</span>
+                </button>
+            );
+        }
 
-                <div className="flex justify-between items-center gap-4 flex-wrap">
-                    <div className="flex-1 flex items-center flex-row min-w-[250px] border border-gray-200 rounded-lg shadow-sm">
-                        <button
-                            className="text-gray-800 font-bold py-2.5 px-4 rounded-l-xl"
-                            type="submit"
-                        >
-                            <IoSearchOutline />
-                        </button>
-                        <input
-                            type="text"
-                            placeholder="Поиск..."
-                            value={searchTerm}
-                            onChange={handleSearch}
-                            className="w-[80%] h-full text-black font-medium rounded-r-xl focus:outline-none p-2"
-                        />
+        if (!isReservation && !isLog) {
+            return (
+                <>
+                    <button
+                        onClick={() => onEdit(row["id"])}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                    >
+                        <Edit2 className="h-4 w-4" />
+                        <span>Изменить</span>
+                    </button>
+                    <button
+                        onClick={() => onDelete(row["id"])}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Удалить</span>
+                    </button>
+                </>
+            );
+        }
+
+        return null;
+    };
+
+    const renderMobileActions = (row) => {
+        if (isReservation) {
+            return (
+                <button
+                    onClick={() => onEdit(row["id"])}
+                    className="flex-1 flex items-center justify-center gap-1 text-blue-600 py-2 text-sm font-medium"
+                >
+                    <Edit2 className="h-4 w-4" />
+                    <span>Изменить статус</span>
+                </button>
+            );
+        }
+
+        if (!isReservation && !isLog) {
+            return (
+                <>
+                    <button
+                        onClick={() => onEdit(row["id"])}
+                        className="flex-1 flex items-center justify-center gap-1 text-blue-600 py-2 text-sm font-medium"
+                    >
+                        <Edit2 className="h-4 w-4" />
+                        <span>Изменить</span>
+                    </button>
+                    <button
+                        onClick={() => onDelete(row["id"])}
+                        className="flex-1 flex items-center justify-center gap-1 text-red-600 py-2 text-sm font-medium"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Удалить</span>
+                    </button>
+                </>
+            );
+        }
+
+        return null;
+    };
+
+    return (
+        <div className="w-full bg-white rounded-lg shadow-md p-4 md:p-6">
+            <div className="mb-4 md:mb-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Таблица данных</h2>
+
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center border border-gray-200 rounded-lg shadow-sm">
+                            <button className="text-gray-800 p-2 md:p-2.5 rounded-l-lg">
+                                <IoSearchOutline className="w-5 h-5" />
+                            </button>
+                            <input
+                                type="text"
+                                placeholder="Поиск..."
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                className="w-full min-w-0 text-black rounded-r-lg focus:outline-none p-2 md:p-2.5"
+                            />
+                        </div>
                     </div>
                     {!isReservation && !isUser && !isLog && (
                         <button
                             onClick={onCreate}
-                            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200"
+                            className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors"
                         >
                             <Plus className="h-4 w-4" />
-                            Создать
+                            <span>Создать</span>
                         </button>
                     )}
                 </div>
             </div>
 
-            {/* Контейнер для скролла с тенями */}
-            <div className="z-0">
-                {/* Тень слева при скролле */}
-                {/*<div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />*/}
-                {/* Тень справа при скролле */}
-                {/*<div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />*/}
-
-                {/* Контейнер с горизонтальным скроллом */}
-                <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                    <div className="inline-block min-w-full align-middle">
-                        <table className="min-w-full border-collapse bg-white text-left">
-                            <thead className="bg-gray-50">
-                            <tr>
-                                {headers.map((header) => (
-                                    <th
-                                        key={header.key}
-                                        onClick={() => handleSort(header.key)}
-                                        className="top-0 px-6 py-4 text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-200 bg-gray-50"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {header.label}
-                                            <span className="text-gray-400">
-                                                    {sortConfig.key === header.key ?
-                                                        (sortConfig.direction === "asc" ?
-                                                                <ChevronUp className="h-4 w-4" /> :
-                                                                <ChevronDown className="h-4 w-4" />
-                                                        ) : null}
-                                                </span>
-                                        </div>
-                                    </th>
-                                ))}
-                                <th className="top-0 right-0 px-6 py-4 text-sm font-semibold text-gray-900 bg-gray-50 min-w-[140px]">
-
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                            {tableData.map((row, index) => (
-                                <tr
-                                    key={index}
-                                    onMouseEnter={() => setHoveredRow(index)}
-                                    onMouseLeave={() => setHoveredRow(null)}
-                                    className={`
-                                            transition-colors duration-200
-                                            ${hoveredRow === index ? 'bg-blue-50' : 'hover:bg-gray-50'}
-                                        `}
+            {/* Десктопная версия */}
+            <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-lg">
+                <div className="min-w-full">
+                    <table className="w-full border-collapse bg-white">
+                        <thead className="bg-gray-50">
+                        <tr>
+                            {headers.map((header) => (
+                                <th
+                                    key={header.key}
+                                    onClick={() => handleSort(header.key)}
+                                    className="px-4 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
                                 >
-                                    {headers.map((header) => (
-                                        <td
-                                            key={header.key}
-                                            className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap"
-                                        >
-                                            {
-                                                header.key === "books.title"
-                                                    ? row.books.map(book => book.title).join(", ")
-                                                    : getValueByPath(row, header.key)
-                                            }
-                                        </td>
-                                    ))}
-                                    <td className="px-6 py-4 whitespace-nowrap min-w-[140px]">
-                                        <div className="flex items-center gap-3">
-                                            {isReservation && (
-                                                <>
-                                                    <button
-                                                        onClick={() => onEdit(row["id"])}
-                                                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors duration-200"
-                                                    >
-                                                        <Edit2 className="h-4 w-4" />
-                                                        <span>Изменить статус</span>
-                                                    </button>
-                                                </>
-                                            )}
-
-                                            {(!isReservation && !isLog) && (
-                                                (
-                                                    <>
-                                                        <button
-                                                            onClick={() => onEdit(row["id"])}
-                                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors duration-200"
-                                                        >
-                                                            <Edit2 className="h-4 w-4" />
-                                                            <span>Изменить</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => onDelete(row["id"])}
-                                                            className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors duration-200"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                            <span>Удалить</span>
-                                                        </button>
-                                                    </>
-                                                )
-                                            )}
-
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <div className="flex items-center gap-2">
+                                        {header.label}
+                                        {sortConfig.key === header.key && (
+                                            <span className="text-gray-400">
+                                                {sortConfig.direction === "asc"
+                                                    ? <ChevronUp className="h-4 w-4" />
+                                                    : <ChevronDown className="h-4 w-4" />}
+                                            </span>
+                                        )}
+                                    </div>
+                                </th>
                             ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            <th className="px-4 py-3 text-sm font-semibold text-gray-900 w-[140px]" />
+                        </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                        {tableData.map((row, index) => (
+                            <tr
+                                key={index}
+                                onMouseEnter={() => setHoveredRow(index)}
+                                onMouseLeave={() => setHoveredRow(null)}
+                                className={`hover:bg-gray-50 ${hoveredRow === index ? 'bg-blue-50' : ''}`}
+                            >
+                                {headers.map((header) => (
+                                    <td key={header.key} className="px-4 py-3 text-sm text-gray-700">
+                                        {header.key === "books.title"
+                                            ? row.books.map(book => book.title).join(", ")
+                                            : getValueByPath(row, header.key)}
+                                    </td>
+                                ))}
+                                <td className="px-4 py-3 w-[140px]">
+                                    <div className="flex items-center gap-3">
+                                        {renderActions(row)}
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+
+            {/* Мобильная версия */}
+            <div className="md:hidden space-y-4">
+                {tableData.map((row, index) => (
+                    <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div className="p-4 space-y-3">
+                            {headers.map((header) => (
+                                <div key={header.key} className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-500">
+                                    {header.label}
+                                </span>
+                                    <span className="text-sm text-gray-900 mt-1">
+                                    {header.key === "books.title"
+                                        ? row.books.map(book => book.title).join(", ")
+                                        : getValueByPath(row, header.key)}
+                                </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                            <div className="flex gap-4">
+                                {renderMobileActions(row)}
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

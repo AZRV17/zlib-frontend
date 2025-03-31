@@ -13,8 +13,8 @@ const UserProfile = () => {
         password: '',
         email: '',
         role: '',
-        phone_number: '', // Обязательно установить пустую строку для всех полей
-        passport_number: '' // Здесь тоже
+        phone_number: '',
+        passport_number: 0
     });
 
     const fetchUser = async () => {
@@ -35,6 +35,8 @@ const UserProfile = () => {
     };
 
     const updateUser = async () => {
+        user.passport_number = parseInt(user.passport_number);
+
         const response = await axios.patch('http://localhost:8080/users/cookie', user, {
             withCredentials: true,
             headers: {

@@ -206,7 +206,7 @@ const UniversalForm = ({
                             console.log('Selected file:', file);
                             handleChange(key, file);
                         }}
-                        accept="image/*"
+                        accept={field.accept}
                         error={!!error}
                     />
                 )}

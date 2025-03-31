@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Link, NavLink } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
     FiBook,
     FiBookmark, FiClipboard,
@@ -8,18 +8,23 @@ import {
     FiHeart,
     FiHome,
     FiLogIn,
-    FiLogOut,
+    FiLogOut, FiMenu,
     FiPenTool,
-    FiUser
+    FiUser, FiX
 } from "react-icons/fi";
 import axios from "axios";
 import {FaNewspaper} from "react-icons/fa";
 import {FaBarcode, FaMasksTheater} from "react-icons/fa6";
+import {BsFillChatTextFill} from "react-icons/bs";
 
 const Header = () => {
+    const [isOpen, setIsOpen] = useState(false);
     const [role, setRole] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [showLogoutModal, setShowLogoutModal] = useState(false); // Для отображения кастомного окна
+
+    const navigate = useNavigate()
+    const location = useLocation();
 
     const fetchUser = async () => {
         try {
@@ -33,6 +38,19 @@ const Header = () => {
             console.log("Ошибка при проверке авторизации", err);
             return null;
         }
+    };
+
+    const handleNavigation = (path) => {
+        setIsOpen(false); // Закрываем меню
+        navigate(path);
+    };
+
+    const handleLogoutClick = (e) => {
+        if (e) {
+            e.preventDefault();
+        }
+        setIsOpen(false);
+        setShowLogoutModal(true);
     };
 
     const handleLogout = async () => {
@@ -51,12 +69,6 @@ const Header = () => {
         } catch (err) {
             console.log("Ошибка при выходе из системы", err);
         }
-    };
-
-    const handleLogoutClick = (e) => {
-        e.preventDefault();
-
-        setShowLogoutModal(true);
     };
 
     const confirmLogout = () => {
@@ -88,163 +100,140 @@ const Header = () => {
         return null;
     }
 
+    const MenuItem = ({ to, icon: Icon, text, onClick }) => {
+        const isActive = location.pathname === to;
+        return (
+            <div
+                className={`flex items-center px-6 py-3 hover:bg-gray-100 cursor-pointer
+                ${isActive ? 'text-[#0D276B] font-medium' : 'text-gray-600'}`}
+                onClick={(e) => { // Добавляем объект события
+                    if (onClick) {
+                        onClick(e);
+                    } else {
+                        handleNavigation(to);
+                    }
+                }}
+            >
+                <Icon size={20} className="mr-3" />
+                <span>{text}</span>
+            </div>
+        );
+    };
+
     return (
-        <header className="text-black flex flex-col justify-start items-center h-full px-4 py-2 w-[100px] fixed left-0 top-0">
-            <Link className="text-[27px] mt-5 font-montserrat text-center font-medium hover:text-gray-400 transition-colors duration-150 cursor-pointer" to="/">
-                ZLib
-            </Link>
-            <nav className="flex flex-col space-y-10 justify-start items-center m-0">
-                {(role === "") && (
-                    <>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] mt-[50%] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/">
-                            <FiHome size={30} />
-                        </NavLink>
+        <>
+            <button
+                className="fixed top-4 left-4 z-50 p-2 rounded-lg hover:bg-gray-100"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
 
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/auth">
-                            <FiLogIn size={30} />
-                        </NavLink>
-                    </>
+            <header className={`fixed left-0 top-0 h-full bg-white shadow-lg w-64 transform 
+                transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} z-40`}>
+                <Link
+                    className="block text-2xl font-bold text-center py-6 border-b border-gray-200"
+                    to="/"
+                    onClick={() => setIsOpen(false)}
+                >
+                    ZLib
+                </Link>
 
-                )}
+                <nav className="py-4">
+                    {role === "" && (
+                        <>
+                            <MenuItem to="/" icon={FiHome} text="Главная" />
+                            <MenuItem to="/auth" icon={FiLogIn} text="Войти" />
+                        </>
+                    )}
 
-                {(role === "user") && (
-                    <>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] mt-[50%] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/">
-                            <FiHome size={30} />
-                        </NavLink>
+                    {role === "user" && (
+                        <>
+                            <MenuItem to="/" icon={FiHome} text="Главная" />
+                            <MenuItem to="/favorites" icon={FiHeart} text="Избранное" />
+                            <MenuItem to="/reservations" icon={FiBookmark} text="Бронирования" />
+                            <MenuItem to="/profile" icon={FiUser} text="Профиль" />
+                            <MenuItem to="/chat" icon={BsFillChatTextFill} text="Чат" />
+                            <MenuItem
+                                to="#"
+                                icon={FiLogOut}
+                                text="Выйти"
+                                onClick={handleLogoutClick}
+                            />
+                        </>
+                    )}
 
-                        <NavLink
-                            className={({ isActive }) =>
-                                `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                            }
-                            to="/favorites">
-                            <FiHeart size={30} />
-                        </NavLink>
+                    {role === "librarian" && (
+                        <>
+                            <MenuItem to="/admin/books" icon={FiBook} text="Книги" />
+                            <MenuItem to="/admin/authors" icon={FiPenTool} text="Авторы" />
+                            <MenuItem to="/admin/genres" icon={FaMasksTheater} text="Жанры" />
+                            <MenuItem to="/admin/publishers" icon={FaNewspaper} text="Издатели" />
+                            <MenuItem to="/admin/unique-codes" icon={FaBarcode} text="Уникальные коды" />
+                            <MenuItem to="/admin/reservations" icon={FiClipboard} text="Бронирования" />
+                            <MenuItem to="/librarian/chat" icon={BsFillChatTextFill} text="Чат" />
+                            <MenuItem
+                                to="#"
+                                icon={FiLogOut}
+                                text="Выйти"
+                                onClick={handleLogoutClick}
+                            />
+                        </>
+                    )}
 
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/reservations">
-                            <FiBookmark size={30} />
-                        </NavLink>
+                    {role === "admin" && (
+                        <>
+                            <MenuItem to="/" icon={FiHome} text="Главная" />
+                            <MenuItem to="/admin/users" icon={FiUser} text="Пользователи" />
+                            <MenuItem to="/admin/backup" icon={FiDatabase} text="БД" />
+                            <MenuItem to="/admin/logs" icon={FiCode} text="Логи" />
+                            <MenuItem
+                                to="#"
+                                icon={FiLogOut}
+                                text="Выйти"
+                                onClick={handleLogoutClick}
+                            />
+                        </>
+                    )}
+                </nav>
+            </header>
 
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/profile">
-                            <FiUser size={30} />
-                        </NavLink>
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-30"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
 
-                        <button
-                            className="text-[20px] font-montserrat transition-colors duration-150 text-gray-400 hover:text-gray-500"
-                            onClick={handleLogoutClick}
-                        >
-                            <FiLogOut size={30} />
-                        </button>
-                    </>
-                )}
-
-                {(role === "admin") && (
-                    <>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] mt-[50%] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/users">
-                            <FiUser size={30} />
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] mt-[50%] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/logs">
-                            <FiClipboard size={30} />
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] mt-[50%] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/backup">
-                            <FiDatabase size={30} />
-                        </NavLink>
-                        <button
-                            className="text-[20px] font-montserrat transition-colors duration-150 text-gray-400 hover:text-gray-500"
-                            onClick={handleLogoutClick}
-                        >
-                            <FiLogOut size={30} />
-                        </button>
-                    </>
-                )}
-
-                {(role === "librarian") && (
-                    <>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] mt-[50%] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/authors">
-                            <FiPenTool size={30} />
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/books">
-                            <FiBook size={30} />
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/genres">
-                            <FaMasksTheater size={27} />
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/publishers">
-                            <FaNewspaper size={27} />
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/unique-codes">
-                            <FaBarcode size={27}/>
-                        </NavLink>
-                        <NavLink className={({ isActive }) =>
-                            `text-[20px] font-montserrat transition-colors duration-150 ${isActive ? 'text-[#0D276B] hover:text-[#0D276B]' : 'text-gray-400 hover:text-gray-500'}`
-                        } to="/admin/reservations">
-                            <FiBookmark size={30}/>
-                        </NavLink>
-                        <button
-                            className="text-[20px] font-montserrat transition-colors duration-150 text-gray-400 hover:text-gray-500"
-                            onClick={handleLogoutClick}
-                        >
-                            <FiLogOut size={30} />
-                        </button>
-                    </>
-                )}
-
-            </nav>
-
-            {/* Модальное окно для подтверждения выхода */}
             {showLogoutModal && (
                 <div className="fixed inset-0 z-[100] flex justify-center items-center bg-black bg-opacity-50">
-                    {/* Модальное окно */}
-                    <div className="relative bg-white p-6 rounded-lg shadow-lg z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
                         <h2 className="text-xl font-bold mb-4">Вы уверены?</h2>
                         <p className="mb-6">Вы хотите выйти из системы?</p>
-                        <div className="flex justify-between">
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400
+                                    transition-colors duration-150"
+                                onClick={cancelLogout}
+                            >
+                                Отмена
+                            </button>
                             <Link
-                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-150"
+                                className="px-4 py-2 rounded-md bg-red-500 text-white
+                                    hover:bg-red-600 transition-colors duration-150"
                                 onClick={confirmLogout}
                                 to="/"
                             >
                                 Выйти
                             </Link>
-                            <button
-                                className="bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-150"
-                                onClick={cancelLogout}
-                            >
-                                Отмена
-                            </button>
                         </div>
                     </div>
                 </div>
             )}
-
-        </header>
+        </>
     );
 };
 
 export default Header;
+
+

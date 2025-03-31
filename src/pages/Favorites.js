@@ -59,30 +59,37 @@ const FavoriteBooks = () => {
                 {favorite.length === 0 ? (
                     <p className="text-gray-600">У вас нет избранных книг.</p>
                 ) : (
-                    <div className="grid grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {favorite.map((f) => (
                             <div
                                 key={f.book.id}
                                 className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => navigate(`/books/${f.book.id}`)} // Clicking the block opens the book page
                             >
-                                <img
-                                    src={f.book.picture}
-                                    alt={f.book.title}
-                                    className="w-full object-cover"
-                                />
-                                <div className="p-4">
-                                    <h3 className="text-lg font-bold">{f.book.title}</h3>
-                                    <p className="text-gray-600">{f.book.author.name} {f.book.author.lastname}</p>
-                                    <FiHeart
-                                        size={30}
-                                        className="transition-transform text-transparent hover:scale-110 hover:transform duration-200 cursor-pointer"
-                                        fill={"red"}
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Prevent navigation when clicking "Remove"
-                                            removeFromFavorites(f.book.id);
-                                        }}
+                                <div className="relative">
+                                    <img
+                                        src={f.book.picture}
+                                        alt={f.book.title}
+                                        className="w-full h-[350px] sm:h-[350px] object-cover"
                                     />
+                                    <div className="absolute top-2 right-2">
+                                        <FiHeart
+                                            size={30}
+                                            className="transition-transform text-transparent
+                                             hover:scale-110 hover:transform duration-200 cursor-pointer"
+                                            fill={"red"}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent navigation when clicking "Remove"
+                                                removeFromFavorites(f.book.id);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="p-3">
+                                    <h3 className="text-sm font-semibold text-gray-800 truncate">{f.book.title}</h3>
+                                    <p className="text-xs text-gray-600 truncate">
+                                        {f.book.author.name} {f.book.author.lastname}
+                                    </p>
                                 </div>
                             </div>
                         ))}

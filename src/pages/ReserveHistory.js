@@ -18,7 +18,6 @@ const ReserveHistory = () => {
             });
 
             if (response.status === 200) {
-                console.log(response.data)
                 setReservarions(response.data);
             }
         } catch (err) {
@@ -34,52 +33,53 @@ const ReserveHistory = () => {
     }, []);
 
     return (
-        <div className="min-h-screen flex w-full bg-gray-100">
+        <div className="min-h-[calc(100vh-64px)] bg-gray-100">
             <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
 
-            <div className="flex flex-col w-full text-gray-800 ml-[100px] p-10">
-                <h1 className="text-4xl font-bold mb-6">История бронирования</h1>
+            <div className="container mx-auto px-4 py-8">
+                <h1 className="text-4xl font-bold mb-8 text-gray-800">История бронирования</h1>
 
                 {loading ? (
-                    <p>Загрузка истории бронирования...</p>
+                    <div className="flex justify-center items-center">
+                        <p className="text-lg text-gray-600">Загрузка истории бронирования...</p>
+                    </div>
                 ) : reservarions.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {reservarions.map((booking) => (
                             <Link
                                 key={booking.id}
-                                className="p-4 bg-white rounded-lg shadow-md w-[60%] cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                                className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 w-full"
                                 to={`/books/${booking.book.id}`}>
-                                <img
-                                    className="w-full h-[200px] object-cover rounded-md"
-                                    src={booking.book.picture || "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg"}
-                                    alt={`Cover of ${booking.book.title}`}
-                                />
-                                <div className="mt-4">
-                                    <h2 className="text-2xl font-bold">{booking.book.title}</h2>
-                                    <p className="text-lg text-gray-600">
+                                <div>
+                                    <img
+                                        className="w-full h-[360px] sm:h-[300px] object-cover rounded-t-lg"
+                                        src={booking.book.picture || "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg"}
+                                        alt={`Cover of ${booking.book.title}`}
+                                    />
+                                </div>
+                                <div className="p-3">
+                                    <h2 className="text-sm font-semibold text-gray-800 truncate">{booking.book.title}</h2>
+                                    <p className="text-xs text-gray-700 truncate">
                                         {booking.book.author?.name} {booking.book.author?.lastname}
                                     </p>
-                                    <p className="text-md text-gray-500">
-                                        Жанр: {booking.book.genre?.name}
+                                    <p className="text-xs text-gray-600 truncate">
+                                        {booking.book.genre?.name}
                                     </p>
-                                    <p className="text-sm text-gray-500">
-                                        Дата бронирования: {new Date(booking.date_of_issue).toLocaleDateString()}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                        Дата возврата: {new Date(booking.date_of_return).toLocaleDateString()}
-                                    </p>
-                                    {new Date(booking.date_of_return) < new Date() && (
-                                        <p className="text-sm font-bold text-red-500">Книга просрочена</p>
-                                    )}
-                                    {/*<p className="text-sm text-gray-500">*/}
-                                    {/*    Статус: {booking.status === "reserved" ? "Забронирована" : "Возвращена"}*/}
-                                    {/*</p>*/}
+                                    <div className="mt-2 text-[11px] text-gray-500">
+                                        <p>Бронь: {new Date(booking.date_of_issue).toLocaleDateString()}</p>
+                                        <p>Возврат: {new Date(booking.date_of_return).toLocaleDateString()}</p>
+                                        {new Date(booking.date_of_return) < new Date() && (
+                                            <p className="text-[11px] font-medium text-red-500">Просрочена</p>
+                                        )}
+                                    </div>
                                 </div>
                             </Link>
                         ))}
                     </div>
                 ) : (
-                    <p>У вас пока нет забронированных книг.</p>
+                    <div className="flex justify-center items-center">
+                        <p className="text-lg text-gray-600">У вас пока нет забронированных книг.</p>
+                    </div>
                 )}
             </div>
         </div>

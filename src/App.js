@@ -1,6 +1,5 @@
-// src/App.js
-import React, {createContext, useState} from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { createContext, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from "./pages/Register";
@@ -25,32 +24,34 @@ import UniqueCodeFormPage from "./components/forms/UniqueCodeFormPage";
 import AdminUsersPage from "./pages/admin_pages/UsersAdmin";
 import BackupRestorePage from "./pages/admin_pages/BackupAdmin";
 import AdminLogsPage from "./pages/admin_pages/LogsAdmin";
+import ReadPage from "./pages/ReadPage";
+import AudioBookEditPage from "./components/forms/AudioBookEditPage";
+import ChatPage from "./pages/ChatPage";
+import LibrarianChatPage from "./pages/LibrarianChatPage";
 
-// Определяем тип контекста с двумя полями: isAuthenticated и setAuth
-export class AuthContextType {
-    isAuthenticated
-    setAuth
-}
-
-// Создаем контекст с типом AuthContextType и начальными значениями по умолчанию
+// Контекст авторизации
 export const AuthContext = createContext({
     isAuthenticated: false,
-    setAuth: () => { },
+    setAuth: () => {},
 });
 
-function App() {
+const AppContent = () => {
+    const location = useLocation();
     const [isAuth, setIsAuth] = useState(false);
 
+    // Проверяем, если текущий путь совпадает с /books/:id/read, то не показываем Header
+    const hideHeader = location.pathname.startsWith("/books/") && location.pathname.endsWith("/read");
+
     return (
-        <Router>
-            <AuthContext.Provider value={{isAuth, setIsAuth}}>
-                <Header/>
+        <AuthContext.Provider value={{ isAuth, setIsAuth }}>
+            {!hideHeader && <Header />}
+            <div className={hideHeader ? "" : "pt-16"}>
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Register />}/>
-                    <Route path="/books" element={<Books />}/>
-                    <Route path="books/:id" element={<BookDetail />}/>
+                    <Route path="/signup" element={<Register />} />
+                    <Route path="/books" element={<Books />} />
+                    <Route path="/books/:id" element={<BookDetail />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/favorites" element={<Favorites />} />
@@ -74,11 +75,20 @@ function App() {
                     <Route path="/admin/unique-codes/new" element={<UniqueCodeFormPage />} />
                     <Route path="/admin/unique-codes/edit/:id" element={<UniqueCodeFormPage />} />
                     <Route path="/admin/backup" element={<BackupRestorePage />} />
-                    {/*<Route element={<PrivateRoute />}>*/}
-
-                    {/*</Route>*/}
+                    <Route path="/books/:id/read" element={<ReadPage />} />
+                    <Route path="/admin/books/audio/edit/:id" element={<AudioBookEditPage />} />
+                    <Route path="/chat" element={<ChatPage />} />
+                    <Route path="/librarian/chat" element={<LibrarianChatPage />} />
                 </Routes>
-            </AuthContext.Provider>
+            </div>
+        </AuthContext.Provider>
+    );
+};
+
+function App() {
+    return (
+        <Router>
+            <AppContent />
         </Router>
     );
 }

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import InputMask from 'react-input-mask';
 import axios from "axios";
+import {toast, ToastContainer} from "react-toastify";
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ const RegisterForm = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const newUser = {
@@ -37,13 +38,18 @@ const RegisterForm = () => {
 
         // setFormData({ login: '', password: '' , email: '', role: '', phone_number: '', passport_number: '' });
 
-        axios.post('http://localhost:8080/users/sign-up', newUser).then(
-            response => console.log(response.data)
-        ).catch(error => console.log(error));
+        const response = await axios.post('http://localhost:8080/users/sign-up', newUser)
+
+        if (response.status === 200) {
+            window.location.href = "/auth";
+        } else {
+            toast.error("Не удалось зарегистрироваться.");
+        }
     };
 
     return (
         <div className="flex justify-center items-center w-full">
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
             <form
                 onSubmit={handleSubmit}
                 className="rounded-lg max-w-md w-full"

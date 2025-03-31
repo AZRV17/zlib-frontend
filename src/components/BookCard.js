@@ -37,7 +37,7 @@ const BookCard = ({ book, onSelectBook }) => {
 
     return (
         <Link
-            className="w-60 h-[20.2em] bg-white rounded-lg
+            className="w-60 h-[21.3em] bg-white rounded-lg
             shadow-md overflow-hidden border
             border-gray-200 m-2 cursor-pointer
             hover:shadow-2xl transition-shadow duration-300

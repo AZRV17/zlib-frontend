@@ -1,6 +1,7 @@
 // src/components/LoginForm.js
 import React, { useState } from 'react';
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -30,9 +31,11 @@ const LoginForm = () => {
             headers: {
                 'Content-Type': 'application/json'
             }
+        }).catch((err) => {
+            toast.error("Не удалось войти.")
         })
 
-        if (response.status === 200) {
+        if (response && response.status === 200) {
             if (response.data.role === "admin") {
                 window.location.href = "/admin/users";
             } else if (response.data.role === "librarian") {
@@ -45,6 +48,7 @@ const LoginForm = () => {
 
     return (
         <div className="flex justify-center items-center w-full">
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
             <form onSubmit={handleSubmit} className="w-full">
                 <h2 className="text-3xl font-bold mb-6 text-center">Вход</h2>
 

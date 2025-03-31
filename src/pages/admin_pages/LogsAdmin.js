@@ -76,7 +76,7 @@ const AdminLogsPage = () => {
     ];
 
     return (
-        <div className="p-6 ml-[100px]">
+        <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Логи</h1>
             {(logs.length !== 0 && columns.length !== 0) && (
                 <UniversalTable

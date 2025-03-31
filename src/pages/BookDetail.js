@@ -1,14 +1,17 @@
 import Header from "../components/Header";
+import {Link} from "react-router-dom";
 import { Book } from "../models/book";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { FiHeart } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import {FiBookOpen, FiDownload, FiHeart} from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import {FaStar} from "react-icons/fa";
 import {Review} from "../models/review";
 import ReviewCard from "../components/ReviewCard";
+import {AudioLinesIcon, FileAudio} from "lucide-react";
+import AudiobookPlayer from "../components/AudiobookPlayer"; // Import the new component
 
 const BookDetail = () => {
     const [book, setBook] = useState(null);
@@ -17,6 +20,7 @@ const BookDetail = () => {
     const [reviews, setReviews] = useState([]);
     const [newReview, setNewReview] = useState("");
     const [rating, setRating] = useState(0);
+    const [showAudioPlayer, setShowAudioPlayer] = useState(false); // State for controlling audio modal
 
     const scrollToReview = (reviewId) => {
         const element = document.getElementById(`review-${reviewId}`);
@@ -163,6 +167,43 @@ const BookDetail = () => {
         }
     };
 
+    const downloadBook = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8080/books/${id}/download`, {
+                withCredentials: true,
+                responseType: 'blob' // Говорим axios, что нам нужен бинарный файл
+            });
+
+            if (response.status === 200) {
+                const url = window.URL.createObjectURL(response.data);
+                const link = document.createElement('a');
+
+                // Получаем имя файла из заголовка, если сервер его отправляет
+                let filename = `book_${new Date().toISOString().replace(/[:.]/g, '-')}.epub`;
+                const contentDisposition = response.headers['content-disposition'];
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+)"/);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                }
+
+                link.href = url;
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+
+                toast.success("Книга успешно скачана!");
+            }
+        } catch (err) {
+            toast.error("Не удалось скачать книгу.");
+            console.log(err);
+        }
+    };
+
+
     const submitReview = async () => {
         try {
             const response = await axios.post(`http://localhost:8080/reviews/`,
@@ -186,10 +227,20 @@ const BookDetail = () => {
 
     const handleRating = (rate) => setRating(rate);
 
+    // Open audio player modal
+    const openAudioPlayer = () => {
+        setShowAudioPlayer(true);
+    };
+
+    // Close audio player modal
+    const closeAudioPlayer = () => {
+        setShowAudioPlayer(false);
+    };
+
     useEffect(() => {
         fetch_book_by_id(id);
         check_is_favorite();
-        fetchReviews()
+        fetchReviews();
 
         const hash = window.location.hash;
         if (hash && hash.startsWith('#review-')) {
@@ -203,52 +254,81 @@ const BookDetail = () => {
         <div className="min-h-screen flex w-full bg-gray-100">
             <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
 
-            {/* <Header /> */}
-            <div className="flex flex-col w-full text-gray-800 ml-[100px] p-10">
-                <div className="flex flex-row w-full">
-                    <div className="w-1/3 mr-10">
+            {/* Основной контент */}
+            <div className="flex flex-col w-full text-gray-800 p-4 md:p-10 md:ml-[100px]">
+                {/* Информация о книге */}
+                <div className="flex flex-col md:flex-row w-full">
+                    {/* Обложка книги */}
+                    <div className="w-full md:w-1/3 md:mr-10 mb-6 md:mb-0">
                         <img
-                            className="w-auto h-[60vh] object-cover rounded-xl shadow-md"
+                            className="w-full h-auto md:h-[60vh] object-cover rounded-xl shadow-md mx-auto"
                             src={book?.picture}
                             alt={`Cover of ${book?.title}`}
                         />
                     </div>
 
-                    <div className="w-2/3 flex flex-col">
-                        <h1 className="text-4xl font-bold mb-4">{book?.title}</h1>
-                        <p className="text-2xl text-gray-600 mb-2">
+                    {/* Детали книги */}
+                    <div className="w-full md:w-2/3 flex flex-col">
+                        <h1 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4">{book?.title}</h1>
+                        <p className="text-xl md:text-2xl text-gray-600 mb-2">
                             {book?.author?.name} {book?.author?.lastname}
                         </p>
-                        <p className="text-xl text-gray-500 mb-5">
+                        <p className="text-lg md:text-xl text-gray-500 mb-4 md:mb-5">
                             Жанр: {book?.genre?.name}
                         </p>
 
-                        <div className="flex flex-row space-x-4 mb-5">
+                        {/* Кнопки действий */}
+                        <div className="flex flex-wrap gap-4 mb-4 md:mb-5">
                             <button
-                                className="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600"
+                                className="flex-1 md:flex-none bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600"
                                 title="Забронировать книгу"
                                 onClick={reserve_book}>
                                 Забронировать
                             </button>
-                            <button
-                                onClick={() => {
-                                    isFilled ? remove_from_favorites() : add_to_favorites();
-                                }}
-                                title="Добавить в избранное"
-                            >
-                                <FiHeart
-                                    size={30}
-                                    className={`transition-colors duration-200 ${
-                                        isFilled ? "text-transparent" : "text-red-500"
-                                    }`}
-                                    fill={isFilled ? "red" : "none"}
-                                />
-                            </button>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => {
+                                        isFilled ? remove_from_favorites() : add_to_favorites();
+                                    }}
+                                    title="Добавить в избранное"
+                                    className="p-2"
+                                >
+                                    <FiHeart
+                                        size={24}
+                                        className={`transition-colors duration-200 ${
+                                            isFilled ? "text-transparent" : "text-red-500"
+                                        }`}
+                                        fill={isFilled ? "red" : "none"}
+                                    />
+                                </button>
+                                <button
+                                    className="text-gray-400 p-2 hover:text-gray-500"
+                                    title="Скачать книгу"
+                                    onClick={downloadBook}
+                                >
+                                    <FiDownload size={24} />
+                                </button>
+                                <Link
+                                    className="text-gray-400 p-2 hover:text-gray-500"
+                                    title="Читать"
+                                    to={`/books/${book?.id}/read`}
+                                >
+                                    <FiBookOpen size={24} />
+                                </Link>
+                                <button
+                                    className="text-gray-400 p-2 hover:text-gray-500"
+                                    title="Прослушать аудиокнигу"
+                                    onClick={openAudioPlayer}
+                                >
+                                    <AudioLinesIcon size={24} />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="mt-5">
-                            <h2 className="text-2xl font-bold mb-3">Описание</h2>
-                            <p className="text-lg text-gray-700 leading-relaxed">
+                        {/* Описание */}
+                        <div className="mt-4 md:mt-5">
+                            <h2 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">Описание</h2>
+                            <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                                 {book?.description}
                             </p>
                         </div>
@@ -256,14 +336,14 @@ const BookDetail = () => {
                 </div>
 
                 {/* Отзывы */}
-                <div className="mt-10">
-                    <h2 className="text-3xl font-bold mb-5">Отзывы</h2>
+                <div className="mt-6 md:mt-10">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-5">Отзывы</h2>
 
-                    {/* Форма добавления отзыва */}
+                    {/* Форма отзыва */}
                     <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-3">Оставьте свой отзыв</h3>
+                        <h3 className="text-lg md:text-xl font-semibold mb-3">Оставьте свой отзыв</h3>
                         <textarea
-                            className="w-full p-2 border rounded-md mb-3"
+                            className="w-full p-2 border rounded-md mb-3 text-sm md:text-base"
                             rows="4"
                             placeholder="Напишите свой отзыв..."
                             value={newReview}
@@ -271,11 +351,11 @@ const BookDetail = () => {
                         ></textarea>
 
                         <div className="flex items-center mb-3">
-                            <span className="mr-2">Оценка:</span>
+                            <span className="mr-2 text-sm md:text-base">Оценка:</span>
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <FaStar
                                     key={star}
-                                    size={24}
+                                    size={20}
                                     className={`cursor-pointer ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
                                     onClick={() => handleRating(star)}
                                 />
@@ -283,7 +363,7 @@ const BookDetail = () => {
                         </div>
 
                         <button
-                            className="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600"
+                            className="w-full md:w-auto bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 text-sm md:text-base"
                             onClick={submitReview}
                         >
                             Отправить отзыв
@@ -297,6 +377,13 @@ const BookDetail = () => {
                         ))}
                     </div>
                 </div>
+
+                {/* Плеер аудиокниги */}
+                <AudiobookPlayer
+                    bookId={id}
+                    isOpen={showAudioPlayer}
+                    onClose={closeAudioPlayer}
+                />
             </div>
         </div>
     );

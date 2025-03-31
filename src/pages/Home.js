@@ -8,11 +8,15 @@ import axios from "axios";
 import { Combobox } from 'react-widgets';
 import 'react-widgets/styles.css';
 import {Link} from "react-router-dom";
+import {Author} from "../models/author";
+import {FiArrowDown} from "react-icons/fi";
 
 const Home = () => {
     const [books, setBooks] = React.useState([]);
+    const [authors, setAuthors] = React.useState([]);
+    const [genres, setGenres] = React.useState([]);
+    const [showScrollButton, setShowScrollButton] = useState(true);
     const [selectedBook, setSelectedBook] = useState(null);
-    const [isSearch, setIsSearch] = useState(false);
 
     const fetch_books = async () => {
         await axios.get("http://localhost:8080/books/").then(
@@ -33,73 +37,187 @@ const Home = () => {
         })
     }
 
+    const fetch_authors = async () => {
+        await axios.get("http://localhost:8080/authors/").then(
+            response => {
+                setAuthors(authors => []);
+                for (let i = 0; i < response.data.length; i++) {
+                    let author = Author.fromJson(response.data[i]);
+                    setAuthors(authors => [...authors, author]);
+                }
+            }
+        ).catch(err => {
+            console.log(err)
+        })
+    }
+
+    const fetch_genres = async () => {
+        await axios.get("http://localhost:8080/genres/").then(
+            response => {
+                setGenres(genres => []);
+                for (let i = 0; i < response.data.length; i++) {
+                    setGenres(genres => [...genres, response.data[i]]);
+                }
+            }
+        ).catch(err => {
+            console.log(err)
+        })
+    }
+
+    const scrollToContent = () => {
+        window.scrollTo({
+            top: window.innerHeight,
+            behavior: 'smooth'
+        });
+    };
+
     useEffect(() => {
         fetch_books()
+        fetch_authors()
+        fetch_genres()
+
+        const handleScroll = () => {
+            setShowScrollButton(window.scrollY < 100);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     return (
-        <main className="min-h-screen flex w-full">
-            {/*<Header />*/}
-            <div className="flex flex-col text-xl w-full font-montserrat font-bold text-white min-h-screen ml-[100px]">
-                <div className="flex flex-col w-full min-h-screen flex-wrap">
+        <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <section className="py-16 md:py-24 text-center">
+                    <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
+                        <span className="text-blue-600">Z</span>Lib
+                    </h1>
+                    <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
+                        Ваша персональная библиотека для чтения и открытия новых историй
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Link
+                            to="/books"
+                            className="px-8 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors duration-300"
+                        >
+                            Начать читать
+                        </Link>
+                        <Link
+                            to="/about"
+                            className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-blue-600 hover:text-blue-600 transition-colors duration-300"
+                        >
+                            О библиотеке
+                        </Link>
+                    </div>
+                </section>
 
-                    {/*TODO add some image */}
+                {/* Статистика */}
+                <section className="py-12 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-b border-gray-200">
+                    <div className="text-center">
+                        <span className="block text-3xl md:text-4xl font-bold text-blue-600">{books.length}</span>
+                        <span className="text-gray-600">Книг</span>
+                    </div>
+                    <div className="text-center">
+                        <span className="block text-3xl md:text-4xl font-bold text-blue-600">24/7</span>
+                        <span className="text-gray-600">Доступ</span>
+                    </div>
+                    <div className="text-center">
+                        <span className="block text-3xl md:text-4xl font-bold text-blue-600">{authors.length}+</span>
+                        <span className="text-gray-600">Авторов</span>
+                    </div>
+                    <div className="text-center">
+                        <span className="block text-3xl md:text-4xl font-bold text-blue-600">{genres.length}+</span>
+                        <span className="text-gray-600">Жанров</span>
+                    </div>
+                </section>
 
-                    <div className="flex flex-row px-10 pt-7 group cursor-pointer mt-3">
-                        <p className="font-montserrat font-bold text-[2em] text-black group-hover:text-blue-600 transition-colors duration-300">Топ 3</p>
+                {/* Кнопка прокрутки */}
+                {showScrollButton && (
+                    <button
+                        onClick={scrollToContent}
+                        className="fixed bottom-8 left-[50%] -translate-x-[50%] bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 animate-bounce z-50 group hidden md:block"
+                        aria-label="Прокрутить вниз"
+                    >
+                        <FiArrowDown className="w-6 h-6" />
+                    </button>
+                )}
+
+                {/* Hero секция с топ-3 */}
+                <section className="py-12 mt-12">
+                    <div className="flex items-center mb-8 group">
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                            Топ популярных книг
+                        </h2>
                         <div className="flex flex-row ml-10 w-10 items-center justify-center group-hover:w-20 transition-width duration-300">
                             <div className="bg-black w-full relative size-1 transition-transform duration-300"></div>
-                            <div className="size-4 mt-[0.1em] ml-[-0.7em] border border-l-0 border-b-0 border-black border-r-4 border-t-4 transform rotate-45"></div>
+                            <div className="size-4 mt-[0.1em] ml-[-0.8em] border border-l-0 border-b-0 border-black border-r-4 border-t-4 transform rotate-45"></div>
                         </div>
                     </div>
 
-                    <div className="flex flex-row p-10 w-full h-fit items-center justify-center gap-[5em] flex-wrap">
-                        <div className="flex flex-row justify-center items-center cursor-pointer hover:transform hover:scale-105 transition-transform duration-300">
-                            <p className="font-montserrat font-bold text-[12em] text-[#390C45]">1</p>
-                            <img
-                                className="w-full h-[14em] ml-[-1.4em] object-cover transition-opacity duration-300 rounded-xl"
-                                src={"https://upload.wikimedia.org/wikipedia/commons/b/bc/%D0%A2%D0%BE%D0%BB%D1%81%D1%82%D0%BE%D0%B9_%D0%9B._%D0%9D._%D0%92%D0%BE%D0%B9%D0%BD%D0%B0_%D0%B8_%D0%BC%D0%B8%D1%80%2C_%D0%A2._1._%D0%9E%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0_%D0%B8%D0%B7%D0%B4.1912%D0%B3%2C%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F.jpg"}
-                                alt={`Cover of`}
-                            />
-                        </div>
-                        <div className="flex flex-row justify-center items-center cursor-pointer hover:transform hover:scale-105 transition-transform duration-300">
-                            <p className="font-montserrat font-bold text-[12em] text-[#0784B0]">2</p>
-                            <img
-                                className="w-full h-[14em] ml-[-2.2em] object-cover transition-opacity duration-300 rounded-xl"
-                                src={"https://upload.wikimedia.org/wikipedia/commons/b/bc/%D0%A2%D0%BE%D0%BB%D1%81%D1%82%D0%BE%D0%B9_%D0%9B._%D0%9D._%D0%92%D0%BE%D0%B9%D0%BD%D0%B0_%D0%B8_%D0%BC%D0%B8%D1%80%2C_%D0%A2._1._%D0%9E%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0_%D0%B8%D0%B7%D0%B4.1912%D0%B3%2C%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F.jpg"}
-                                alt={`Cover of`}
-                            />
-                        </div>
-                        <div className="flex flex-row justify-center items-center cursor-pointer hover:transform hover:scale-105 transition-transform duration-300">
-                            <p className="font-montserrat font-bold text-[12em] text-[#E7D923]">3</p>
-                            <img
-                                className="w-full h-[14em] ml-[-2.4em] object-cover transition-opacity duration-300 rounded-xl"
-                                src={"https://upload.wikimedia.org/wikipedia/commons/b/bc/%D0%A2%D0%BE%D0%BB%D1%81%D1%82%D0%BE%D0%B9_%D0%9B._%D0%9D._%D0%92%D0%BE%D0%B9%D0%BD%D0%B0_%D0%B8_%D0%BC%D0%B8%D1%80%2C_%D0%A2._1._%D0%9E%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B0_%D0%B8%D0%B7%D0%B4.1912%D0%B3%2C%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F.jpg"}
-                                alt={`Cover of`}
-                            />
-                        </div>
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                        {[0, 1, 2].map((index) => (
+                            <Link
+                                key={index}
+                                to={books[index] ? `/books/${books[index].id}` : '#'}
+                                className="relative group"
+                            >
+                                <div className="relative overflow-hidden rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-105">
+                                    <div className={`absolute inset-0 ${
+                                        index === 0 ? 'bg-purple-600'
+                                            : index === 1 ? 'bg-blue-500'
+                                                : 'bg-yellow-500'
+                                    } opacity-65 z-10`} />
 
+                                    <img
+                                        className="w-full h-[400px] object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                        src={books[index]?.picture || "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg"}
+                                        alt={books[index]?.title || "Книга"}
+                                    />
+
+                                    <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white">
+                                    <span className={`text-8xl md:text-9xl font-bold ${
+                                        index === 0 ? 'text-purple-100'
+                                            : index === 1 ? 'text-blue-100'
+                                                : 'text-yellow-100'
+                                    } opacity-80`}>
+                                        {index + 1}
+                                    </span>
+                                        <h3 className="text-xl md:text-2xl font-bold mb-2">
+                                            {books[index]?.title || "Загрузка..."}
+                                        </h3>
+                                        <p className="text-sm md:text-base opacity-75">
+                                            {books[index]?.author?.name || ""} {books[index]?.author?.lastname || ""}
+                                        </p>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Секция всех книг */}
+                <section className="py-12">
                     <Link
-                        className="flex flex-row px-10 pt-7 group cursor-pointer"
+                        className="flex flex-row px-10 group cursor-pointer"
                         to="/books"
                     >
                         <p className="font-montserrat font-bold text-[2em] text-black group-hover:text-blue-600 transition-colors duration-300">Все книги</p>
                         <div className="flex flex-row ml-10 w-10 items-center justify-center group-hover:w-20 transition-width duration-300">
                             <div className="bg-black w-full relative size-1 transition-transform duration-300"></div>
-                            <div className="size-4 mt-[0.1em] ml-[-0.7em] border border-l-0 border-b-0 border-black border-r-4 border-t-4 transform rotate-45"></div>
+                            <div className="size-4 mt-[0.1em] ml-[-0.8em] border border-l-0 border-b-0 border-black border-r-4 border-t-4 transform rotate-45"></div>
                         </div>
                     </Link>
 
-                    <div className="flex flex-wrap p-4 w-full min-h-screen">
-                        {books.sort().map(book => (
-                            <BookCard key={book.id} book={book} onSelectBook={setSelectedBook} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {books.map(book => (
+                            <BookCard
+                                key={book.id}
+                                book={book}
+                                onSelectBook={() => setSelectedBook(book)} // Исправлено
+                            />
                         ))}
                     </div>
-                </div>
+                </section>
             </div>
-
-
         </main>
     );
 };

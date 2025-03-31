@@ -120,6 +120,13 @@ const BookFormPage = () => {
             required: !isEdit  // Required only for new books
         },
         {
+            key: 'epub',
+            label: 'EPUB',
+            type: 'file',
+            accept: '.epub',
+            required: !isEdit
+        },
+        {
             key: 'genre',
             label: 'Жанр',
             type: "select",
@@ -142,6 +149,10 @@ const BookFormPage = () => {
             required: true
         }
     ];
+
+    const handleEditAudioBook = () => {
+        navigate(`/admin/books/audio/edit/${id}`);
+    };
 
     const handleSubmit = async (formData) => {
         try {
@@ -168,6 +179,13 @@ const BookFormPage = () => {
                 form.append('picture', formData.picture, formData.picture.name);
             } else {
                 console.log('No file or invalid file object:', formData.picture);
+            }
+
+            if (formData.epub instanceof File) {
+                console.log('Appending file to form data');
+                form.append('epub', formData.epub, formData.epub.name);
+            } else {
+                console.log('No file or invalid file object:', formData.epub);
             }
 
             // Log the form data for debugging
@@ -225,6 +243,12 @@ const BookFormPage = () => {
                 onCancel={handleCancel}
                 isEdit={isEdit}
             />
+            <button
+                onClick={handleEditAudioBook}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
+            >
+                Аудиофайлы
+            </button>
         </div>
     );
 };

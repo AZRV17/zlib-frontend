@@ -72,7 +72,7 @@ const AdminUniqueCodesPage = () => {
     ];
 
     return (
-        <div className="p-6 ml-[100px]">
+        <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Уникальные коды</h1>
             {(uniqueCode.length !== 0 && columns.length !== 0) && (
                 <UniversalTable

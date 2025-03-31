@@ -117,25 +117,26 @@ const Books = () => {
         setSortLabel(option.label);
     };
 
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                pageNumbers.push(1, 2, 3, 4, '...', totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pageNumbers.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pageNumbers.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            }
+        }
+        return pageNumbers;
+    };
+
     // Enhanced Pagination Component
     const Pagination = () => {
-        const getPageNumbers = () => {
-            const pageNumbers = [];
-            if (totalPages <= 7) {
-                for (let i = 1; i <= totalPages; i++) {
-                    pageNumbers.push(i);
-                }
-            } else {
-                if (currentPage <= 3) {
-                    pageNumbers.push(1, 2, 3, 4, '...', totalPages);
-                } else if (currentPage >= totalPages - 2) {
-                    pageNumbers.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-                } else {
-                    pageNumbers.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-                }
-            }
-            return pageNumbers;
-        };
 
         const renderPageButton = (number) => {
             if (number === '...') {
@@ -196,45 +197,41 @@ const Books = () => {
     };
 
     return (
-        <main className="min-h-screen flex w-full">
-            <div className="flex flex-col text-xl w-full font-montserrat font-bold text-white min-h-screen ml-[100px]">
-                <div className="flex flex-col w-full min-h-screen flex-wrap">
-                    {/* Filter and Sort header */}
-                    <div className="flex flex-row w-full prN-10 pt-7 items-center space-x-6">
-                        {/* Search Bar */}
-                        <div className={`flex flex-row h-[50px] ${isSearch ? 'w-[90%]' : 'w-[40%]'} p-1 px-6 duration-300`}>
-                            <button
-                                className="bg-[#F4F4F4] text-gray-800 font-bold py-2 px-4 rounded-l-xl"
-                                type="submit"
-                            >
-                                <IoSearchOutline />
+        <main className="min-h-screen bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                {/* Фильтры и поиск */}
+                <div className="flex flex-col md:flex-row gap-4 mb-8">
+                    {/* Поисковая строка */}
+                    <div className="w-full md:w-1/2 lg:w-2/5">
+                        <div className="flex items-center border border-gray-200 rounded-lg bg-white shadow-sm">
+                            <button className="p-3 text-gray-500">
+                                <IoSearchOutline className="w-5 h-5" />
                             </button>
                             <input
-                                className="bg-[#F4F4F4] w-[80%] h-full text-black font-light rounded-r-xl focus:outline-none p-2"
-                                onFocus={() => setIsSearch(true)}
-                                onBlur={() => setIsSearch(false)}
+                                className="w-full p-3 text-gray-700 placeholder-gray-400 bg-transparent focus:outline-none"
                                 type="text"
-                                placeholder="Поиск"
+                                placeholder="Поиск книг..."
                                 value={searchQuery}
                                 onChange={handleSearch}
                             />
                         </div>
+                    </div>
 
-                        {/* Genre Filter */}
-                        <div className="flex flex-row h-[50px] w-[20%] text-gray-800 text-lg p-1 px-6">
+                    {/* Фильтры */}
+                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-1/2 lg:w-3/5">
+                        <div className="flex-1">
                             <DropdownList
                                 placeholder="Выберите жанр"
-                                data={[...genres, {name: "Все жанры"}]}
+                                data={[{ name: "Все жанры" }, ...genres]}
                                 value={selectedGenre}
                                 onChange={setSelectedGenre}
                                 textField="name"
                                 valueField="name"
-                                onFocus={() => setIsSearch(false)}
+                                className="h-full"
+                                containerClassName="h-full"
                             />
                         </div>
-
-                        {/* Sort Option */}
-                        <div className="flex flex-row h-[50px] w-[20%] text-gray-800 text-lg p-1 cursor-pointer px-6">
+                        <div className="flex-1">
                             <DropdownList
                                 data={[
                                     { label: "Название", value: 'title' },
@@ -244,38 +241,88 @@ const Books = () => {
                                 onChange={handleSortChange}
                                 textField="label"
                                 valueField="value"
-                                placeholder="Сортировать по"
-                                onKeyPress={(e) => e.preventDefault()}
-                                dropUp={false}
-                                tabIndex={-1}
+                                placeholder="Сортировка"
+                                className="h-full"
+                                containerClassName="h-full"
                             />
                         </div>
                     </div>
-
-                    {/* Books list with loading state */}
-                    <div className="flex flex-wrap p-4 w-full min-h-screen">
-                        {isLoading ? (
-                            <div className="w-full h-[50vh] flex justify-center items-center">
-                                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : sortedBooks.length > 0 ? (
-                            sortedBooks.map(book => (
-                                <BookCard key={book.id} book={book} onSelectBook={setSelectedBook} />
-                            ))
-                        ) : (
-                            <div className="w-full h-[50vh] flex justify-center items-center text-gray-500 text-xl">
-                                Книги не найдены
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && !isLoading && (
-                        <div className="w-full flex justify-center pb-8">
-                            <Pagination />
-                        </div>
-                    )}
                 </div>
+
+                {/* Список книг */}
+                {isLoading ? (
+                    <div className="flex justify-center items-center min-h-[60vh]">
+                        <div className="relative w-20 h-20">
+                            <div className="absolute border-4 border-gray-200 rounded-full w-full h-full"></div>
+                            <div className="absolute border-4 border-blue-500 rounded-full w-full h-full animate-spin border-t-transparent"></div>
+                        </div>
+                    </div>
+                ) : sortedBooks.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {sortedBooks.map(book => (
+                            <BookCard key={book.id} book={book} onSelectBook={setSelectedBook} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-500">
+                        <p className="text-xl font-medium">Книги не найдены</p>
+                        <p className="mt-2 text-sm text-gray-400">Попробуйте изменить параметры поиска</p>
+                    </div>
+                    )}
+
+                {/* Пагинация */}
+                {totalPages > 1 && !isLoading && (
+                    <div className="mt-8 flex justify-center">
+                        <div className="inline-flex rounded-lg shadow bg-white">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className={`p-2 rounded-l-lg border-r ${
+                                    currentPage === 1
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+
+                            <div className="flex">
+                                {getPageNumbers().map((number, index) => (
+                                    <React.Fragment key={index}>
+                                        {number === '...' ? (
+                                            <span className="flex items-center justify-center w-10 text-gray-500">
+                                            <MoreHorizontal className="w-5 h-5" />
+                                        </span>
+                                        ) : (
+                                            <button
+                                                onClick={() => handlePageChange(number)}
+                                                className={`w-10 ${
+                                                    currentPage === number
+                                                        ? 'bg-blue-500 text-white'
+                                                        : 'text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                {number}
+                                            </button>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className={`p-2 rounded-r-lg border-l ${
+                                    currentPage === totalPages
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </main>
     );
