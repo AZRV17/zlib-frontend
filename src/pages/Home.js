@@ -94,18 +94,12 @@ const Home = () => {
                     <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
                         Ваша персональная библиотека для чтения и открытия новых историй
                     </p>
-                    <div className="flex justify-center gap-4">
+                    <div className="flex justify-center">
                         <Link
                             to="/books"
                             className="px-8 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors duration-300"
                         >
                             Начать читать
-                        </Link>
-                        <Link
-                            to="/about"
-                            className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-blue-600 hover:text-blue-600 transition-colors duration-300"
-                        >
-                            О библиотеке
                         </Link>
                     </div>
                 </section>

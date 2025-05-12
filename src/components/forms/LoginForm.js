@@ -26,67 +26,100 @@ const LoginForm = () => {
             password: formData.password
         };
 
-        const response = await axios.post("http://localhost:8080/users/sign-in-by-login", user, {
-            withCredentials: true,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).catch((err) => {
-            toast.error("Не удалось войти.")
-        })
+        if (!user.login || !user.password) {
+            toast.error("Заполните все поля.");
+            return;
+        }
 
-        if (response && response.status === 200) {
-            if (response.data.role === "admin") {
-                window.location.href = "/admin/users";
-            } else if (response.data.role === "librarian") {
-                window.location.href = "/admin/authors";
-            } else {
-                window.location.href = "/";
+        if (user.login.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+            user = {
+                email: user.login,
+                password: user.password
+            }
+
+            const response = await axios.post("http://localhost:8080/users/sign-in-by-email", user, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).catch((err) => {
+                toast.error("Не удалось войти.")
+            })
+
+            if (response && response.status === 200) {
+                if (response.data.role === "admin") {
+                    window.location.href = "/admin/users";
+                } else if (response.data.role === "librarian") {
+                    window.location.href = "/admin/authors";
+                } else {
+                    window.location.href = "/";
+                }
+            }
+        } else {
+            const response = await axios.post("http://localhost:8080/users/sign-in-by-login", user, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).catch((err) => {
+                toast.error("Не удалось войти.")
+            })
+
+            if (response && response.status === 200) {
+                if (response.data.role === "admin") {
+                    window.location.href = "/admin/users";
+                } else if (response.data.role === "librarian") {
+                    window.location.href = "/admin/authors";
+                } else {
+                    window.location.href = "/";
+                }
             }
         }
     };
 
     return (
-        <div className="flex justify-center items-center w-full">
+        <div className="w-full">
             <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-            <form onSubmit={handleSubmit} className="w-full">
-                <h2 className="text-3xl font-bold mb-6 text-center">Вход</h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <h2 className="text-3xl font-bold text-center text-gray-900">Вход</h2>
 
-                <div className="mb-4">
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                        Логин или Email
-                    </label>
-                    <input
-                        type="text"
-                        name="login"
-                        id="login"
-                        value={formData.login}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="Введите логин или email"
-                    />
-                </div>
+                <div className="space-y-6">
+                    <div>
+                        <label htmlFor="login" className="block text-sm font-medium text-gray-700">
+                            Логин или Email
+                        </label>
+                        <input
+                            type="text"
+                            name="login"
+                            id="login"
+                            value={formData.login}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Введите логин или email"
+                        />
+                    </div>
 
-                <div className="mb-4">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Пароль
-                    </label>
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="Введите пароль"
-                    />
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            Пароль
+                        </label>
+                        <input
+                            type="password"
+                            name="password"
+                            id="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Введите пароль"
+                        />
+                    </div>
                 </div>
 
                 <button
                     type="submit"
-                    className="w-full font-medium bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-150"
+                    className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
                 >
                     Войти
                 </button>

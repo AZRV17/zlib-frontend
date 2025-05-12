@@ -175,13 +175,29 @@ const EpubReader = ({ book, isDarkMode, bookId }) => {
         if (rendition) rendition.next();
     };
 
+    // Обработчик для изменения шрифта
+    const handleFontChange = (e) => {
+        setSelectedFont(e.target.value);
+        setTimeout(() => {
+            window.location.reload();
+        }, 100); // Небольшая задержка для сохранения в localStorage
+    };
+
+// Обработчик для изменения размера шрифта
+    const handleFontSizeChange = (newSize) => {
+        setFontSize(newSize);
+        setTimeout(() => {
+            window.location.reload();
+        }, 100); // Небольшая задержка для сохранения в localStorage
+    };
+
     return (
         <div className={`relative w-full h-[80vh] flex flex-col items-center ${isDarkMode ? 'bg-gray-950' : 'bg-white'}`}>
             <div className="w-full flex justify-center mb-4 space-x-4">
                 {/* Font Selection Dropdown */}
                 <select
                     value={selectedFont}
-                    onChange={(e) => setSelectedFont(e.target.value)}
+                    onChange={handleFontChange}
                     className={`px-2 py-1 rounded ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'}`}
                 >
                     <option value="default">Default Font</option>
@@ -189,17 +205,16 @@ const EpubReader = ({ book, isDarkMode, bookId }) => {
                     <option value="monospace">Monospace Font</option>
                 </select>
 
-                {/* Font Size Adjustment */}
                 <div className="flex items-center space-x-2">
                     <button
-                        onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                        onClick={() => handleFontSizeChange(Math.max(12, fontSize - 2))}
                         className={`px-2 py-1 rounded ${isDarkMode ? 'text-white hover:bg-gray-800' : 'text-black hover:bg-gray-200'}`}
                     >
                         A-
                     </button>
                     <span className={`${isDarkMode ? 'text-white' : 'text-black'}`}>{fontSize}px</span>
                     <button
-                        onClick={() => setFontSize(Math.min(36, fontSize + 2))}
+                        onClick={() => handleFontSizeChange(Math.min(36, fontSize + 2))}
                         className={`px-2 py-1 rounded ${isDarkMode ? 'text-white hover:bg-gray-800' : 'text-black hover:bg-gray-200'}`}
                     >
                         A+

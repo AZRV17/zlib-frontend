@@ -72,7 +72,7 @@ const PublisherFormPage = () => {
     return (
         <div className="p-6 ml-[100px]">
             <h1 className="text-2xl font-bold mb-6">
-                {isEdit ? 'Редактировать автора' : 'Добавить автора'}
+                {isEdit ? 'Редактировать издательство' : 'Добавить издательство'}
             </h1>
             <UniversalForm
                 initialData={initialData}

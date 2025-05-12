@@ -3,7 +3,7 @@ import axios from "axios";
 import UniversalTable from "../../components/UniversalTable"; // Import the universal table component
 import {Reservation, reservation} from "../../models/reservation";
 import {Link, useNavigate} from "react-router-dom";
-import {ChevronDown} from "lucide-react";
+import {ChevronDown, Download} from "lucide-react";
 import {toast} from "react-toastify";
 
 const AdminReservationsPage = () => {
@@ -95,9 +95,9 @@ const AdminReservationsPage = () => {
 
             console.log(response.data)
 
-            setSelectedReservation(Reservation.fromJson(response.data));
-
-            setStatus(setSelectedReservation.status)
+            const reservation = Reservation.fromJson(response.data);
+            setSelectedReservation(reservation);
+            setStatus(reservation.status);
         } catch (error) {
             console.error("Error fetching reservation:", error);
         }
@@ -118,6 +118,31 @@ const AdminReservationsPage = () => {
         setIsEdit(true);
     };
 
+    const handleExportCSV = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/reservations/export", {
+                withCredentials: true,
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([response.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.href = url;
+            link.setAttribute('download', `reservations_${timestamp}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            toast.success('CSV файл успешно скачан');
+        } catch (error) {
+            console.error("Error exporting CSV:", error);
+            toast.error('Ошибка при экспорте CSV файла');
+        }
+    };
+
     useEffect(() => {
         fetchReservations();
     }, []);
@@ -135,7 +160,17 @@ const AdminReservationsPage = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Бронирования</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Бронирования</h1>
+
+                <button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                    <Download size={20} />
+                    Экспорт в CSV
+                </button>
+            </div>
             {(reservations.length !== 0 && columns.length !== 0) && (
                 <UniversalTable
                     data={reservations}
@@ -157,8 +192,8 @@ const AdminReservationsPage = () => {
                                 onClick={() => setIsOpen(!isOpen)}
                                 className={`w-full px-3 py-2 border rounded-lg cursor-pointer flex items-center justify-between border-gray-300`}
                             >
-                                <span className={`${!selectedReservation ? 'text-gray-500' : ''}`}>
-                                    {selectedReservation.id ? options.find(opt => opt.value === selectedReservation.status)['label'] : 'Выберите из списка...'}
+                                <span className={`${!status ? 'text-gray-500' : ''}`}>
+                                    {status ? options.find(opt => opt.value === status)?.label : 'Выберите из списка...'}
                                 </span>
                                 <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                             </div>
@@ -168,9 +203,11 @@ const AdminReservationsPage = () => {
                                     {options.map((option) => (
                                         <div
                                             key={option.value}
-                                            className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                            className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                                                status === option.value ? 'bg-blue-50' : ''
+                                            }`}
                                             onClick={() => {
-                                                setStatus({ target: { value: option.value } }.target.value);
+                                                setStatus(option.value);
                                                 setIsOpen(false);
                                             }}
                                         >

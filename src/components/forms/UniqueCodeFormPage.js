@@ -102,7 +102,7 @@ const UniqueCodeFormPage = () => {
     return (
         <div className="p-6 ml-[100px]">
             <h1 className="text-2xl font-bold mb-6">
-                {isEdit ? 'Редактировать автора' : 'Добавить автора'}
+                {isEdit ? 'Редактировать код' : 'Добавить код'}
             </h1>
             <UniversalForm
                 initialData={initialData}

@@ -36,8 +36,6 @@ const RegisterForm = () => {
             passport_number: parseInt(formData.passport_number),
         };
 
-        // setFormData({ login: '', password: '' , email: '', role: '', phone_number: '', passport_number: '' });
-
         const response = await axios.post('http://localhost:8080/users/sign-up', newUser)
 
         if (response.status === 200) {

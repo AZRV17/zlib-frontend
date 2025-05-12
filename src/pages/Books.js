@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Book } from "../models/book";
 import React, { useEffect, useState } from "react";
+import { Range } from "react-range";
 import { IoSearchOutline } from "react-icons/io5";
 import { DropdownList } from "react-widgets/cjs";
 import BookCard from "../components/BookCard";
@@ -13,33 +14,34 @@ const Books = () => {
     const [isSearch, setIsSearch] = useState(false);
     const [genres, setGenres] = useState([]);
     const [selectedGenre, setSelectedGenre] = useState(null);
+    const [authors, setAuthors] = useState([]);
+    const [selectedAuthor, setSelectedAuthor] = useState(null);
+    const [yearRange, setYearRange] = useState([1900, new Date().getFullYear()]);
     const [sortOption, setSortOption] = useState('title');
     const [sortLabel, setSortLabel] = useState('Название');
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+    const [filteredBooks, setFilteredBooks] = useState([]);
 
-    // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Debounce search query
     useDebounce(
         () => {
             setDebouncedSearchQuery(searchQuery);
-            setCurrentPage(1); // Reset to first page on new search
+            setCurrentPage(1);
         },
-        500, // 500ms delay
+        500,
         [searchQuery]
     );
 
-    // Fetch books with pagination and search
     const fetchBooks = async (page, searchTerm = '') => {
         setIsLoading(true);
         try {
             let url = `http://localhost:8080/books/pagination?page=${page}`;
             if (searchTerm) {
-                url += `&title=${encodeURIComponent(searchTerm)}`;
+                url += `&query=${encodeURIComponent(searchTerm)}`;
             }
 
             const response = await axios.get(url);
@@ -50,18 +52,17 @@ const Books = () => {
                 if (!book.picture) {
                     book.picture = "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg";
                 }
-
-                console.log(book.picture)
-
                 return book;
             });
 
             setBooks(processedBooks);
+            setFilteredBooks(processedBooks); // Добавьте эту строку
             setTotalPages(total);
             setCurrentPage(current);
         } catch (err) {
             console.log(err);
             setBooks([]);
+            setFilteredBooks([]); // И эту тоже
             setTotalPages(1);
         } finally {
             setIsLoading(false);
@@ -77,6 +78,19 @@ const Books = () => {
         }
     };
 
+    const fetchAuthors = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/authors/");
+            setAuthors(response.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        fetchAuthors();
+    }, [books, selectedGenre, selectedAuthor, yearRange]);
+
     useEffect(() => {
         fetchBooks(currentPage, debouncedSearchQuery);
     }, [currentPage, debouncedSearchQuery]);
@@ -84,6 +98,43 @@ const Books = () => {
     useEffect(() => {
         fetchGenres();
     }, []);
+
+    useEffect(() => {
+        if (books.length > 0) {
+            const filtered = books.filter(book => {
+                // Извлекаем год из даты
+                const year = new Date(book.year_of_publication).getFullYear();
+                const minYear = yearRange[0];
+                const maxYear = yearRange[1];
+
+                console.log(`Книга: ${book.title}, Извлеченный год: ${year}`);
+
+                const matchesGenre = !selectedGenre || selectedGenre.name === "Все жанры" || book.genre?.name === selectedGenre.name;
+                const matchesAuthor = !selectedAuthor || selectedAuthor.name === "Все авторы" || book.author?.name === selectedAuthor.name;
+                const matchesYear = year >= minYear && year <= maxYear;
+
+                return matchesGenre && matchesAuthor && matchesYear;
+            });
+
+            const sorted = [...filtered].sort((a, b) => {
+                switch (sortOption) {
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'rating':
+                        return b.rating - a.rating;
+                    case 'publicationDate':
+                    case 'publicationYear':
+                        return new Date(b.year_of_publication).getFullYear() - new Date(a.year_of_publication).getFullYear();
+                    case 'author':
+                        return a.author?.name.localeCompare(b.author?.name);
+                    default:
+                        return 0;
+                }
+            });
+
+            setFilteredBooks(sorted);
+        }
+    }, [books, selectedGenre, selectedAuthor, yearRange, sortOption]);
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -96,21 +147,28 @@ const Books = () => {
         setSearchQuery(e.target.value);
     };
 
-    const filteredBooks = books.filter(book => {
-        const matchesGenre = selectedGenre && selectedGenre.name !== "Все жанры"
-            ? book.genre.name === selectedGenre.name
-            : true;
-        return matchesGenre;
-    });
+    // const filteredBooks = books.filter(book => {
+    //     const matchesGenre = !selectedGenre || selectedGenre.name === "Все жанры" || book.genre?.name === selectedGenre.name;
+    //     const matchesAuthor = !selectedAuthor || selectedAuthor.name === "Все авторы" || book.author?.name === selectedAuthor.name;
+    //     const matchesYear = !book.publicationYear || (book.publicationYear >= yearRange[0] && book.publicationYear <= yearRange[1]);
+    //
+    //     return matchesGenre && matchesAuthor && matchesYear;
+    // });
 
-    const sortedBooks = filteredBooks.sort((a, b) => {
-        if (sortOption === 'title') {
-            return a.title.localeCompare(b.title);
-        } else if (sortOption === 'rating') {
-            return b.rating - a.rating;
-        }
-        return 0;
-    });
+    // const sortedBooks = filteredBooks.sort((a, b) => {
+    //     if (sortOption === 'title') {
+    //         return a.title.localeCompare(b.title);
+    //     } else if (sortOption === 'rating') {
+    //         return b.rating - a.rating;
+    //     } else if (sortOption === 'publicationDate') {
+    //         return new Date(b.publicationDate) - new Date(a.publicationDate);
+    //     } else if (sortOption === 'author') {
+    //         return a.author.localeCompare(b.author);
+    //     } else if (sortOption === 'publicationYear') {
+    //         return a.publicationYear - b.publicationYear;
+    //     }
+    //     return 0;
+    // });
 
     const handleSortChange = (option) => {
         setSortOption(option.value);
@@ -135,117 +193,113 @@ const Books = () => {
         return pageNumbers;
     };
 
-    // Enhanced Pagination Component
-    const Pagination = () => {
-
-        const renderPageButton = (number) => {
-            if (number === '...') {
-                return (
-                    <div className="flex items-center justify-center w-10 h-10 text-gray-600">
-                        <MoreHorizontal size={20} />
-                    </div>
-                );
-            }
-
-            return (
-                <button
-                    key={number}
-                    onClick={() => handlePageChange(number)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-200 
-                        ${currentPage === number
-                        ? 'bg-blue-500 text-white'
-                        : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                    {number}
-                </button>
-            );
-        };
-
-        return (
-            <div className="flex items-center justify-center space-x-2 bg-white p-4 rounded-xl shadow-sm">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200
-                        ${currentPage === 1
-                        ? 'text-gray-300 cursor-not-allowed'
-                        : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                    <ChevronLeft size={20} />
-                </button>
-
-                <div className="flex space-x-1">
-                    {getPageNumbers().map((number, index) => (
-                        <React.Fragment key={index}>
-                            {renderPageButton(number)}
-                        </React.Fragment>
-                    ))}
-                </div>
-
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200
-                        ${currentPage === totalPages
-                        ? 'text-gray-300 cursor-not-allowed'
-                        : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                    <ChevronRight size={20} />
-                </button>
-            </div>
-        );
-    };
-
     return (
         <main className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 {/* Фильтры и поиск */}
-                <div className="flex flex-col md:flex-row gap-4 mb-8">
+                <div className="flex flex-wrap items-center gap-4 p-4 bg-white shadow-md rounded-lg mb-8">
                     {/* Поисковая строка */}
-                    <div className="w-full md:w-1/2 lg:w-2/5">
-                        <div className="flex items-center border border-gray-200 rounded-lg bg-white shadow-sm">
-                            <button className="p-3 text-gray-500">
-                                <IoSearchOutline className="w-5 h-5" />
-                            </button>
-                            <input
-                                className="w-full p-3 text-gray-700 placeholder-gray-400 bg-transparent focus:outline-none"
-                                type="text"
-                                placeholder="Поиск книг..."
-                                value={searchQuery}
-                                onChange={handleSearch}
-                            />
+                    <div className="flex items-center border border-gray-300 rounded-lg bg-gray-50 shadow-sm flex-1 min-w-[250px]">
+                        <button className="p-3 text-gray-500">
+                            <IoSearchOutline className="w-5 h-5" />
+                        </button>
+                        <input
+                            className="w-full p-3 text-gray-700 placeholder-gray-400 bg-transparent focus:outline-none"
+                            type="text"
+                            placeholder="Поиск книг..."
+                            value={searchQuery}
+                            onChange={handleSearch}
+                        />
+                    </div>
+
+                    {/* Фильтр по жанру */}
+                    <div className="flex-1 min-w-[200px]">
+                        <DropdownList
+                            placeholder="Выберите жанр"
+                            data={[{ name: "Все жанры" }, ...genres]}
+                            value={selectedGenre}
+                            onChange={setSelectedGenre}
+                            textField="name"
+                            valueField="name"
+                            className="h-full"
+                            containerClassName="h-full"
+                        />
+                    </div>
+
+                    {/* Фильтр по автору */}
+                    <div className="flex-1 min-w-[200px]">
+                        <DropdownList
+                            placeholder="Выберите автора"
+                            data={[{ name: "Все авторы", lastname: "Все авторы" }, ...authors]}
+                            value={selectedAuthor}
+                            onChange={setSelectedAuthor}
+                            textField="lastname"
+                            valueField="name"
+                            className="h-full"
+                            containerClassName="h-full"
+                        />
+                    </div>
+
+                    {/* Фильтр по году публикации */}
+                    <div className="flex flex-col items-center min-w-[250px]">
+                        <label className="block font-medium text-gray-700 mb-2">Год публикации</label>
+                        <Range
+                            step={1}
+                            min={1900}
+                            max={new Date().getFullYear()}
+                            values={yearRange}
+                            onChange={(values) => {
+                                setYearRange(values)
+                            }}
+                            renderTrack={({ props, children }) => (
+                                <div
+                                    {...props}
+                                    style={{
+                                        ...props.style,
+                                        height: "6px",
+                                        width: "100%",
+                                        background: "linear-gradient(to right, #3b82f6, #d1d5db)",
+                                        borderRadius: "3px",
+                                    }}
+                                >
+                                    {children}
+                                </div>
+                            )}
+                            renderThumb={({ props }) => (
+                                <div
+                                    {...props}
+                                    style={{
+                                        ...props.style,
+                                        height: "20px",
+                                        width: "20px",
+                                        borderRadius: "50%",
+                                        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
+                                    }}
+                                />
+                            )}
+                        />
+                        <div className="flex justify-between w-full mt-2 text-sm text-gray-600">
+                            <span>{yearRange[0]}</span>
+                            <span>{yearRange[1]}</span>
                         </div>
                     </div>
 
-                    {/* Фильтры */}
-                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-1/2 lg:w-3/5">
-                        <div className="flex-1">
-                            <DropdownList
-                                placeholder="Выберите жанр"
-                                data={[{ name: "Все жанры" }, ...genres]}
-                                value={selectedGenre}
-                                onChange={setSelectedGenre}
-                                textField="name"
-                                valueField="name"
-                                className="h-full"
-                                containerClassName="h-full"
-                            />
-                        </div>
-                        <div className="flex-1">
-                            <DropdownList
-                                data={[
-                                    { label: "Название", value: 'title' },
-                                    { label: "Рейтинг", value: 'rating' }
-                                ]}
-                                value={{ label: sortLabel, value: sortOption }}
-                                onChange={handleSortChange}
-                                textField="label"
-                                valueField="value"
-                                placeholder="Сортировка"
-                                className="h-full"
-                                containerClassName="h-full"
-                            />
-                        </div>
+                    {/* Сортировка */}
+                    <div className="flex-1 min-w-[200px]">
+                        <DropdownList
+                            data={[
+                                { label: "Название", value: 'title' },
+                                { label: "Рейтинг", value: 'rating' },
+                                { label: "Дата публикации", value: 'publicationDate' }
+                            ]}
+                            value={{ label: sortLabel, value: sortOption }}
+                            onChange={handleSortChange}
+                            textField="label"
+                            valueField="value"
+                            placeholder="Сортировка"
+                            className="h-full"
+                            containerClassName="h-full"
+                        />
                     </div>
                 </div>
 
@@ -257,9 +311,9 @@ const Books = () => {
                             <div className="absolute border-4 border-blue-500 rounded-full w-full h-full animate-spin border-t-transparent"></div>
                         </div>
                     </div>
-                ) : sortedBooks.length > 0 ? (
+                ) : filteredBooks.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {sortedBooks.map(book => (
+                        {filteredBooks.map(book => (
                             <BookCard key={book.id} book={book} onSelectBook={setSelectedBook} />
                         ))}
                     </div>
@@ -268,7 +322,7 @@ const Books = () => {
                         <p className="text-xl font-medium">Книги не найдены</p>
                         <p className="mt-2 text-sm text-gray-400">Попробуйте изменить параметры поиска</p>
                     </div>
-                    )}
+                )}
 
                 {/* Пагинация */}
                 {totalPages > 1 && !isLoading && (

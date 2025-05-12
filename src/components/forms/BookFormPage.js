@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UniversalForm from '../../components/forms/UniversalForm';
+import {Book} from "../../models/book";
 
 const BookFormPage = () => {
     const { id } = useParams();
@@ -11,6 +12,7 @@ const BookFormPage = () => {
     const [authors, setAuthors] = useState([]);
     const [genres, setGenres] = useState([]);
     const [publishers, setPublishers] = useState([]);
+    const [book, setBook] = useState({});
 
     useEffect(() => {
         if (isEdit) {
@@ -31,11 +33,14 @@ const BookFormPage = () => {
                 }
             });
 
-            const book = response.data;
+            setBook(Book.fromJson(response.data));
+
             if (book.year_of_publication) {
                 const date = new Date(book.year_of_publication);
                 book.year_of_publication = date.toISOString().split('T')[0];
             }
+
+            console.log('Fetched book:', book);
 
             setInitialData(response.data);
         } catch (error) {
@@ -166,9 +171,9 @@ const BookFormPage = () => {
             form.append('year_of_publication', new Date(formData.year_of_publication).toISOString());
 
             // Add IDs from select fields - Note the change from 'author' to 'author_id' to match backend
-            form.append('author_id', formData.author.id);
-            form.append('genre_id', formData.genre.id);
-            form.append('publisher_id', formData.publisher.id);
+            form.append('author', formData.author.id);
+            form.append('genre', formData.genre.id);
+            form.append('publisher', formData.publisher.id);
 
             // Debug logging to check file
             console.log('File being uploaded:', formData.picture);
@@ -223,32 +228,50 @@ const BookFormPage = () => {
     };
 
     return (
-        <div className="p-6 ml-[100px]">
-            <h1 className="text-2xl font-bold mb-6">
-                {isEdit ? 'Редактировать книгу' : 'Добавить книгу'}
-            </h1>
-            {initialData.picture && (
-                <div className="mb-4">
-                    <img
-                        src={`http://localhost:8080${initialData.picture}`}
-                        alt="Current book cover"
-                        className="max-w-xs"
-                    />
+        <div className="p-6 lg:ml-[100px] min-h-screen bg-gray-50">
+            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+                <h1 className="text-2xl font-bold mb-8 text-gray-800">
+                    {isEdit ? 'Редактировать книгу' : 'Добавить книгу'}
+                </h1>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    {/* Превью изображения */}
+                    {book.picture && (
+                        <div className="space-y-4">
+                            <h3 className="font-medium text-gray-700">Текущая обложка:</h3>
+                            <div className="relative aspect-[3/4] w-full max-w-sm mx-auto">
+                                <img
+                                    src={book.picture}
+                                    alt="Обложка книги"
+                                    className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-md"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Форма */}
+                    <div className={`${initialData.picture ? 'md:col-span-1' : 'md:col-span-2'}`}>
+                        <UniversalForm
+                            initialData={initialData}
+                            fields={fields}
+                            onSubmit={handleSubmit}
+                            onCancel={handleCancel}
+                            isEdit={isEdit}
+                        />
+                    </div>
                 </div>
-            )}
-            <UniversalForm
-                initialData={initialData}
-                fields={fields}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                isEdit={isEdit}
-            />
-            <button
-                onClick={handleEditAudioBook}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
-            >
-                Аудиофайлы
-            </button>
+
+                {isEdit && (
+                    <div className="mt-6 flex justify-center">
+                        <button
+                            onClick={handleEditAudioBook}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg shadow-sm transition-colors duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                            Редактировать аудиофайлы
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

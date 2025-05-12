@@ -20,6 +20,8 @@ const ReserveHistory = () => {
             if (response.status === 200) {
                 setReservarions(response.data);
             }
+
+            console.log(response);
         } catch (err) {
             toast.error("Не удалось загрузить историю бронирования.");
             console.log(err);
@@ -27,6 +29,16 @@ const ReserveHistory = () => {
             setLoading(false);
         }
     };
+
+    const showStatus = (status) => {
+        if (status === "returned") {
+            return "Возвращена";
+        } else if (status === "taken") {
+            return "Взята";
+        } else {
+            return "Забронирована";
+        }
+    }
 
     useEffect(() => {
         fetchReserveHistory();
@@ -68,9 +80,10 @@ const ReserveHistory = () => {
                                     <div className="mt-2 text-[11px] text-gray-500">
                                         <p>Бронь: {new Date(booking.date_of_issue).toLocaleDateString()}</p>
                                         <p>Возврат: {new Date(booking.date_of_return).toLocaleDateString()}</p>
-                                        {new Date(booking.date_of_return) < new Date() && (
+                                        {(new Date(booking.date_of_return) < new Date() && booking.status !== "returned") && (
                                             <p className="text-[11px] font-medium text-red-500">Просрочена</p>
                                         )}
+                                        <p>Статус: {showStatus(booking.status)}</p>
                                     </div>
                                 </div>
                             </Link>

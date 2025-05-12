@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {FiTrash2} from "react-icons/fi";
 
 const AudioBookEditPage = () => {
     const { id } = useParams();
@@ -109,16 +110,53 @@ const AudioBookEditPage = () => {
     };
 
     // Изменение порядка файлов
-    const handleReorderFiles = async (fileId, direction) => {
+    const handleReorderFiles = async (fileId, newOrder) => {
         try {
             setIsLoading(true);
-            await axios.put(`http://localhost:8080/books/${id}/audio/${fileId}/reorder`, { direction });
+            await axios.put(`http://localhost:8080/books/${id}/audio/${fileId}/reorder`, { newOrder }, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
             // Обновление списка файлов
             const filesResponse = await axios.get(`http://localhost:8080/books/${id}/audio`);
             setAudioFiles(filesResponse.data || []);
             setSuccess('Порядок файлов обновлен!');
         } catch (err) {
+            setError('Ошибка при изменении порядка файлов: ' + err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleOrderChange = async (fileId, e) => {
+        const newOrder = parseInt(e.target.value);
+        if (isNaN(newOrder)) return;
+
+        try {
+            setIsLoading(true);
+            await axios.put(`http://localhost:8080/books/${id}/audio/${fileId}/reorder`, { "new_order": newOrder }, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log(response)
+            })
+
+            // Обновление списка файлов локально
+            const updatedFiles = audioFiles.map(file => {
+                if (file.id === fileId) {
+                    return { ...file, order: newOrder };
+                }
+                return file;
+            });
+            setAudioFiles(updatedFiles.sort((a, b) => a.order - b.order));
+            setSuccess('Порядок файлов обновлен!');
+        } catch (err) {
+            console.log(err)
             setError('Ошибка при изменении порядка файлов: ' + err.message);
         } finally {
             setIsLoading(false);
@@ -249,10 +287,17 @@ const AudioBookEditPage = () => {
                         {audioFiles.sort((a, b) => a.order - b.order).map((file, index) => (
                             <li key={file.id} className="py-4">
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                                    <div className="flex items-start mb-2 md:mb-0">
-                                        <span className="text-gray-700 mr-2 mt-1">{file.order}.</span>
+                                    <div className="flex items-center mb-2 md:mb-0"> {/* Изменено: items-start на items-center */}
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max={audioFiles.length}
+                                            value={file.order}
+                                            onChange={(e) => handleOrderChange(file.id, e)}
+                                            className="w-16 text-gray-700 mr-2 border border-gray-300 rounded py-1 px-2"
+                                        />
                                         <div>
-                                            <div className="flex items-center mb-1">
+                                            <div className="flex items-center">
                                                 <input
                                                     type="text"
                                                     value={file.chapter_title}
@@ -266,8 +311,8 @@ const AudioBookEditPage = () => {
                                                     className="font-medium border border-gray-300 rounded py-1 px-2 mr-2"
                                                 />
                                                 <span className="text-sm text-gray-500">
-                          {getFilenameFromPath(file.file_path)}
-                        </span>
+                        {getFilenameFromPath(file.file_path)}
+                    </span>
                                             </div>
                                         </div>
                                     </div>
@@ -278,34 +323,14 @@ const AudioBookEditPage = () => {
                                             Ваш браузер не поддерживает аудиоэлемент.
                                         </audio>
 
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => handleReorderFiles(file.id, 'up')}
-                                                className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-50"
-                                                title="Переместить вверх"
-                                                disabled={isLoading || file.order <= 1}
-                                            >
-                                                ↑
-                                            </button>
-
-                                            <button
-                                                onClick={() => handleReorderFiles(file.id, 'down')}
-                                                className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-50"
-                                                title="Переместить вниз"
-                                                disabled={isLoading || file.order >= audioFiles.length}
-                                            >
-                                                ↓
-                                            </button>
-
-                                            <button
-                                                onClick={() => handleDeleteFile(file.id)}
-                                                className="p-1 text-red-600 hover:text-red-900"
-                                                title="Удалить файл"
-                                                disabled={isLoading}
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteFile(file.id)}
+                                            className="p-2 text-gray-600 hover:text-red-600 transition-colors duration-150"
+                                            title="Удалить файл"
+                                            disabled={isLoading}
+                                        >
+                                            <FiTrash2 className="w-5 h-5" />
+                                        </button>
                                     </div>
                                 </div>
                             </li>

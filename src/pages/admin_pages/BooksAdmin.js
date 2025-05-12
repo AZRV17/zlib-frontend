@@ -4,9 +4,13 @@ import UniversalTable from "../../components/UniversalTable"; // Import the univ
 import { Author } from "../../models/author";
 import { useNavigate } from "react-router-dom";
 import {Book} from "../../models/book";
+import {Download} from "lucide-react";
+import {ToastContainer, toast} from "react-toastify";
+import {FiUpload} from "react-icons/fi";
 
 const AdminBooksPage = () => {
     const [books, setBooks] = useState([]);
+    const [file, setFile] = useState(null);
     const navigate = useNavigate();
 
     // Fetch authors data
@@ -55,6 +59,62 @@ const AdminBooksPage = () => {
         navigate("/admin/books/new");
     };
 
+    const handleExportCSV = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/books/export", {
+                withCredentials: true,
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([response.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.href = url;
+            link.setAttribute('download', `books_${timestamp}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            toast.success('CSV файл успешно скачан');
+        } catch (error) {
+            console.error("Error exporting CSV:", error);
+            toast.error('Ошибка при экспорте CSV файла');
+        }
+    };
+
+    const handleFileChange = (e) => {
+        toast.info("Файл выбран");
+        setFile(e.target.files[0]);
+    };
+
+    const handleImportCSV = async () => {
+        if (!file) {
+            toast.error("Пожалуйста, выберите CSV файл");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("csv", file);
+
+        try {
+            const response = await axios.post("http://localhost:8080/books/import", formData, {
+                withCredentials: true,
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            toast.success(response.data.message);
+            fetchBooks();
+            setFile(null);
+        } catch (error) {
+            console.error("Error importing CSV:", error);
+            toast.error(error.response?.data?.error || "Ошибка при импорте CSV файла");
+        }
+    };
+
     useEffect(() => {
         fetchBooks();
     }, []);
@@ -76,7 +136,41 @@ const AdminBooksPage = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Книги</h1>
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Книги</h1>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={handleExportCSV}
+                        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                    >
+                        <Download size={20} />
+                        Экспорт в CSV
+                    </button>
+
+                    <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="csv-upload"
+                    />
+                    <label
+                        htmlFor="csv-upload"
+                        className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                    >
+                        <FiUpload size={20} className="inline-block mr-2" />
+                        Выбрать CSV
+                    </label>
+                    <button
+                        onClick={handleImportCSV}
+                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                    >
+                        Импортировать
+                    </button>
+                </div>
+            </div>
+
             {(books.length !== 0 && columns.length !== 0) && (
                 <UniversalTable
                     data={books}

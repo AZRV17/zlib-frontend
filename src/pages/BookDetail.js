@@ -1,4 +1,3 @@
-import Header from "../components/Header";
 import {Link} from "react-router-dom";
 import { Book } from "../models/book";
 import { useParams } from "react-router-dom";
@@ -220,8 +219,14 @@ const BookDetail = () => {
                 setTimeout(() => scrollToReview(newReviewId), 100);
             }
         } catch (err) {
-            toast.error("Не удалось добавить отзыв.");
-            console.log(err);
+            if (err.response && err.response.status === 401) {
+                toast.error("Пожалуйста, войдите в систему, чтобы оставить отзыв.");
+            } else if (err.response.data.error === "user already reviewed this book") {
+                toast.error("Вы уже оставили отзыв на эту книгу.");
+            } else {
+                toast.error("Не удалось добавить отзыв.");
+                console.log(err);
+            }
         }
     };
 
@@ -273,12 +278,27 @@ const BookDetail = () => {
                         <p className="text-xl md:text-2xl text-gray-600 mb-2">
                             {book?.author?.name} {book?.author?.lastname}
                         </p>
-                        <p className="text-lg md:text-xl text-gray-500 mb-4 md:mb-5">
+                        <p className="text-lg md:text-xl text-gray-500">
                             Жанр: {book?.genre?.name}
                         </p>
+                        <p className="text-lg md:text-xl text-gray-500 mb-4 md:mb-5">
+                            Год: {new Date(book?.year_of_publication).getFullYear()}
+                        </p>
+                        {/* Рейтинг книги */}
+                        <div className="flex items-center mb-3">
+                            <span className="text-lg md:text-xl text-gray-500 mr-2">Рейтинг:</span>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <FaStar
+                                    key={star}
+                                    size={24}
+                                    className={`${star <= book?.rating ? "text-yellow-500" : "text-gray-400"}`}
+                                    onClick={() => handleRating(star)}
+                                />
+                            ))}
+                        </div>
 
                         {/* Кнопки действий */}
-                        <div className="flex flex-wrap gap-4 mb-4 md:mb-5">
+                        <div className="flex flex-wrap gap-4">
                             <button
                                 className="flex-1 md:flex-none bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600"
                                 title="Забронировать книгу"

@@ -66,7 +66,9 @@ const AdminUsersPage = () => {
                     'Content-Type': 'application/json'
                 }
             });
-            setSelectedUser(User.fromJson(response.data));
+            const user = User.fromJson(response.data);
+            setSelectedUser(user);
+            setRole(user.role);
         } catch (error) {
             console.error("Error fetching author:", error);
         }
@@ -149,9 +151,9 @@ const AdminUsersPage = () => {
                 />
             )}
 
+            {/* Модальное окно */}
             {isEdit && (
                 <div className="fixed inset-0 z-[100] flex justify-center items-center bg-black bg-opacity-50">
-                    {/* Модальное окно */}
                     <div className="relative bg-white p-6 rounded-lg shadow-lg z-50">
                         <h2 className="text-xl font-bold mb-4">Выберите роль</h2>
                         <div className="relative">
@@ -159,9 +161,9 @@ const AdminUsersPage = () => {
                                 onClick={() => setIsOpen(!isOpen)}
                                 className={`w-full px-3 py-2 border rounded-lg cursor-pointer flex items-center justify-between border-gray-300`}
                             >
-                                <span className={`${!selectedUser ? 'text-gray-500' : ''}`}>
-                                    {selectedUser.id ? options.find(opt => opt.value === selectedUser.role)['label'] : 'Выберите из списка...'}
-                                </span>
+                    <span className={`${!role ? 'text-gray-500' : ''}`}>
+                        {role ? options.find(opt => opt.value === role)?.label : 'Выберите из списка...'}
+                    </span>
                                 <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                             </div>
 
@@ -170,9 +172,11 @@ const AdminUsersPage = () => {
                                     {options.map((option) => (
                                         <div
                                             key={option.value}
-                                            className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                            className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                                                role === option.value ? 'bg-blue-50' : ''
+                                            }`}
                                             onClick={() => {
-                                                setRole({ target: { value: option.value } }.target.value);
+                                                setRole(option.value);
                                                 setIsOpen(false);
                                             }}
                                         >
