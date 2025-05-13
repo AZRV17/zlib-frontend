@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import UniversalTable from "../../components/UniversalTable"; // Import the universal table component
+import UniversalTable from "../../components/UniversalTable";
 import { Author } from "../../models/author";
 import { useNavigate } from "react-router-dom";
 import {Book} from "../../models/book";
@@ -8,6 +8,7 @@ import {Genre} from "../../models/genre";
 import {toast, ToastContainer} from "react-toastify";
 import {Download} from "lucide-react";
 import {FiUpload} from "react-icons/fi";
+import {api} from '../../App.js'
 
 const AdminGenresPage = () => {
     const [genres, setGenres] = useState([]);
@@ -17,7 +18,7 @@ const AdminGenresPage = () => {
     // Fetch authors data
     const fetchGenres = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/genres/", {
+            const response = await axios.get(`${api}/genres/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -39,7 +40,7 @@ const AdminGenresPage = () => {
     // Delete author
     const handleDeleteGenre = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/genres/${id}`, {
+            await axios.delete(`${api}/genres/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -63,7 +64,7 @@ const AdminGenresPage = () => {
 
     const handleExportCSV = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/genres/export", {
+            const response = await axios.get(`${api}/genres/export`, {
                 withCredentials: true,
                 responseType: 'blob',
             });
@@ -101,7 +102,7 @@ const AdminGenresPage = () => {
         formData.append("csv", file);
 
         try {
-            const response = await axios.post("http://localhost:8080/genres/import", formData, {
+            const response = await axios.post(`${api}/genres/import`, formData, {
                 withCredentials: true,
                 headers: {
                     "Content-Type": "multipart/form-data",

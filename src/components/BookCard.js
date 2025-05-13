@@ -1,13 +1,14 @@
 import React, {useEffect} from 'react';
 import {Book} from "../models/book";
 import axios from "axios";
+import {api} from '../App.js'
 import {render} from "@testing-library/react";
 import {Link} from "react-router-dom";
 
 const BookCard = ({ book, onSelectBook }) => {
 
     const fetch_book = async (id) => {
-        await axios.get(`http://localhost:8080/books/${id}`).then(
+        await axios.get(`${api}/books/${id}`).then(
             response => {
                 onSelectBook(book => Book.fromJson(response.data));
             }

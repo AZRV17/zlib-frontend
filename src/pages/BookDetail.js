@@ -11,6 +11,7 @@ import {Review} from "../models/review";
 import ReviewCard from "../components/ReviewCard";
 import {AudioLinesIcon, FileAudio} from "lucide-react";
 import AudiobookPlayer from "../components/AudiobookPlayer"; // Import the new component
+import {api} from '../App.js'
 
 const BookDetail = () => {
     const [book, setBook] = useState(null);
@@ -59,7 +60,7 @@ const BookDetail = () => {
     };
 
     const fetch_book_by_id = async (id) => {
-        await axios.get(`http://localhost:8080/books/${id}`, {
+        await axios.get(`${api}/books/${id}`, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'
@@ -79,7 +80,7 @@ const BookDetail = () => {
 
     const check_is_favorite = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/favorites/cookie`, {
+            const response = await axios.get(`${api}/favorites/cookie`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -97,7 +98,7 @@ const BookDetail = () => {
 
     const reserve_book = async () => {
         try {
-            const response = await axios.post(`http://localhost:8080/books/${id}`, {}, {
+            const response = await axios.post(`${api}/books/${id}`, {}, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -114,7 +115,7 @@ const BookDetail = () => {
 
     const add_to_favorites = async () => {
         try {
-            const response = await axios.post(`http://localhost:8080/favorites/cookie`, { "book_id": parseInt(id) }, {
+            const response = await axios.post(`${api}/favorites/cookie`, { "book_id": parseInt(id) }, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -132,7 +133,7 @@ const BookDetail = () => {
 
     const remove_from_favorites = async () => {
         try {
-            await axios.delete(`http://localhost:8080/favorites/cookie/${parseInt(id)}`, {
+            await axios.delete(`${api}/favorites/cookie/${parseInt(id)}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -148,7 +149,7 @@ const BookDetail = () => {
 
     const fetchReviews = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/reviews/${id}`, {
+            const response = await axios.get(`${api}/reviews/${id}`, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -168,7 +169,7 @@ const BookDetail = () => {
 
     const downloadBook = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/books/${id}/download`, {
+            const response = await axios.get(`${api}/books/${id}/download`, {
                 withCredentials: true,
                 responseType: 'blob' // Говорим axios, что нам нужен бинарный файл
             });
@@ -205,7 +206,7 @@ const BookDetail = () => {
 
     const submitReview = async () => {
         try {
-            const response = await axios.post(`http://localhost:8080/reviews/`,
+            const response = await axios.post(`${api}/reviews/`,
                 { message: newReview, rating: parseFloat(rating), book_id: parseInt(id) },
                 { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
             );

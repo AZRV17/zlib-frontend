@@ -10,6 +10,7 @@ import 'react-widgets/styles.css';
 import {Link} from "react-router-dom";
 import {Author} from "../models/author";
 import {FiArrowDown} from "react-icons/fi";
+import {api} from '../App.js'
 
 const Home = () => {
     const [books, setBooks] = React.useState([]);
@@ -19,7 +20,7 @@ const Home = () => {
     const [selectedBook, setSelectedBook] = useState(null);
 
     const fetch_books = async () => {
-        await axios.get("http://localhost:8080/books/").then(
+        await axios.get(`${api}/books/`).then(
             response => {
                 setBooks(books => []);
                 for (let i = 0; i < response.data.length; i++) {
@@ -38,7 +39,7 @@ const Home = () => {
     }
 
     const fetch_authors = async () => {
-        await axios.get("http://localhost:8080/authors/").then(
+        await axios.get(`${api}/authors/`).then(
             response => {
                 setAuthors(authors => []);
                 for (let i = 0; i < response.data.length; i++) {
@@ -52,7 +53,7 @@ const Home = () => {
     }
 
     const fetch_genres = async () => {
-        await axios.get("http://localhost:8080/genres/").then(
+        await axios.get(`${api}/genres/`).then(
             response => {
                 setGenres(genres => []);
                 for (let i = 0; i < response.data.length; i++) {

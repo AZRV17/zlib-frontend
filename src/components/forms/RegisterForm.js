@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import InputMask from 'react-input-mask';
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
+import api from '../../App.js'
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -36,7 +37,7 @@ const RegisterForm = () => {
             passport_number: parseInt(formData.passport_number),
         };
 
-        const response = await axios.post('http://localhost:8080/users/sign-up', newUser)
+        const response = await axios.post(`${api}/users/sign-up`, newUser)
 
         if (response.status === 200) {
             window.location.href = "/auth";

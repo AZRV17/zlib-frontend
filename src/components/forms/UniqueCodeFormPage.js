@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UniversalForm from '../../components/forms/UniversalForm';
-import {data} from "autoprefixer";
+import {api} from '../../App.js'
+
 
 const UniqueCodeFormPage = () => {
     const { id } = useParams();
@@ -20,7 +21,7 @@ const UniqueCodeFormPage = () => {
 
     const fetchUniqueCodes = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/unique-codes/${id}`, {
+            const response = await axios.get(`${api}/unique-codes/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,7 +36,7 @@ const UniqueCodeFormPage = () => {
 
     const fetchBooks = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/books/', {
+            const response = await axios.get(`${api}/books/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -75,14 +76,14 @@ const UniqueCodeFormPage = () => {
             const dataToSend = {...formData, book: parseInt(formData.book.id), code: parseInt(formData.code)};
 
             if (isEdit) {
-                await axios.put(`http://localhost:8080/unique-codes/${id}`, dataToSend, {
+                await axios.put(`${api}/unique-codes/${id}`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
             } else {
-                await axios.post('http://localhost:8080/unique-codes/', dataToSend, {
+                await axios.post(`${api}/unique-codes/`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'

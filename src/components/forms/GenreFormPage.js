@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UniversalForm from '../../components/forms/UniversalForm';
-import {data} from "autoprefixer";
+import {api} from '../../App.js'
 
 const GenreFormPage = () => {
     const { id } = useParams();
@@ -18,7 +18,7 @@ const GenreFormPage = () => {
 
     const fetchGenre = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/genres/${id}`, {
+            const response = await axios.get(`${api}/genres/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -51,14 +51,14 @@ const GenreFormPage = () => {
             const dataToSend = {...formData};
 
             if (isEdit) {
-                await axios.put(`http://localhost:8080/genres/${id}`, dataToSend, {
+                await axios.put(`${api}/genres/${id}`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
             } else {
-                await axios.post('http://localhost:8080/genres/', dataToSend, {
+                await axios.post(`${api}/genres/`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'

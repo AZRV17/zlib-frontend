@@ -7,6 +7,7 @@ import { DropdownList } from "react-widgets/cjs";
 import BookCard from "../components/BookCard";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { useDebounce } from 'react-use';
+import {api} from '../App.js'
 
 const Books = () => {
     const [books, setBooks] = useState([]);
@@ -39,7 +40,7 @@ const Books = () => {
     const fetchBooks = async (page, searchTerm = '') => {
         setIsLoading(true);
         try {
-            let url = `http://localhost:8080/books/pagination?page=${page}`;
+            let url = `${api}/books/pagination?page=${page}`;
             if (searchTerm) {
                 url += `&query=${encodeURIComponent(searchTerm)}`;
             }
@@ -71,7 +72,7 @@ const Books = () => {
 
     const fetchGenres = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/genres/");
+            const response = await axios.get(`${api}/genres/`);
             setGenres(response.data);
         } catch (err) {
             console.log(err);
@@ -80,7 +81,7 @@ const Books = () => {
 
     const fetchAuthors = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/authors/");
+            const response = await axios.get(`${api}/authors/`);
             setAuthors(response.data);
         } catch (err) {
             console.log(err);

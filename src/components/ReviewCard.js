@@ -2,6 +2,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import {toast} from "react-toastify";
 import {FiShare} from "react-icons/fi";
+import {api} from '../App.js'
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);

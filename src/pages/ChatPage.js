@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import {FiMenu} from "react-icons/fi";
+import {api} from '../App.js'
 
 const ChatPage = () => {
     const [messages, setMessages] = useState([]);
@@ -49,7 +50,7 @@ const ChatPage = () => {
     const fetchChats = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:8080/chats/', {
+            const response = await fetch(`${api}/chats/`, {
                 credentials: 'include'
             });
 
@@ -75,7 +76,7 @@ const ChatPage = () => {
     // Получение сообщений чата
     const fetchMessages = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8080/chats/${id}/messages`, {
+            const response = await fetch(`${api}/chats/${id}/messages`, {
                 credentials: 'include'
             });
 
@@ -135,7 +136,7 @@ const ChatPage = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/chats/', {
+            const response = await fetch(`${api}/chats/`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {User} from "../../models/user";
 import {ChevronDown} from "lucide-react";
 import {toast} from "react-toastify";
+import {api} from '../../App.js'
 
 const AdminUsersPage = () => {
     const [users, setUsers] = useState([]);
@@ -33,7 +34,7 @@ const AdminUsersPage = () => {
     // Fetch authors data
     const fetchUsers = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/users/", {
+            const response = await axios.get(`${api}/users/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -60,7 +61,7 @@ const AdminUsersPage = () => {
 
     const fetchUser = async (id) => {
         try {
-            const response = await axios.get(`http://localhost:8080/users/${id}`, {
+            const response = await axios.get(`${api}/users/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -77,7 +78,7 @@ const AdminUsersPage = () => {
     // Delete author
     const handleDeleteAuthor = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/users/${id}`, {
+            await axios.delete(`${api}/users/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -91,7 +92,7 @@ const AdminUsersPage = () => {
 
     const confirmEdit = async () => {
         try {
-            await axios.patch(`http://localhost:8080/users/change-role`, {"id": editId, "role": role}, {
+            await axios.patch(`${api}/users/change-role`, {"id": editId, "role": role}, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

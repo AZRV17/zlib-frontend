@@ -4,6 +4,7 @@ import UniversalTable from "../../components/UniversalTable"; // Import the univ
 import { Author } from "../../models/author";
 import { useNavigate } from "react-router-dom";
 import {Log} from "../../models/log";
+import {api} from '../../App.js'
 
 const AdminLogsPage = () => {
     const [logs, setLogs] = useState([]);
@@ -12,7 +13,7 @@ const AdminLogsPage = () => {
     // Fetch authors data
     const fetchLogs = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/logs/", {
+            const response = await axios.get(`${api}/logs/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -40,7 +41,7 @@ const AdminLogsPage = () => {
     // Delete author
     const handleDeleteAuthor = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/authors/${id}`, {
+            await axios.delete(`${api}/authors/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

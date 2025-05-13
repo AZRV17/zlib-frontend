@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import UniversalTable from "../../components/UniversalTable"; // Import the universal table component
+import UniversalTable from "../../components/UniversalTable";
 import { Author } from "../../models/author";
 import { useNavigate } from "react-router-dom";
 import {Book} from "../../models/book";
 import {Download} from "lucide-react";
 import {ToastContainer, toast} from "react-toastify";
 import {FiUpload} from "react-icons/fi";
+import {api} from '../../App.js'
 
 const AdminBooksPage = () => {
     const [books, setBooks] = useState([]);
@@ -16,7 +17,7 @@ const AdminBooksPage = () => {
     // Fetch authors data
     const fetchBooks = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/books/", {
+            const response = await axios.get(`${api}/books/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,7 +38,7 @@ const AdminBooksPage = () => {
     // Delete author
     const handleDeleteBook = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/books/${id}`, {
+            await axios.delete(`${api}/books/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -61,7 +62,7 @@ const AdminBooksPage = () => {
 
     const handleExportCSV = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/books/export", {
+            const response = await axios.get(`${api}/books/export`, {
                 withCredentials: true,
                 responseType: 'blob',
             });
@@ -99,7 +100,7 @@ const AdminBooksPage = () => {
         formData.append("csv", file);
 
         try {
-            const response = await axios.post("http://localhost:8080/books/import", formData, {
+            const response = await axios.post(`${api}/books/import`, formData, {
                 withCredentials: true,
                 headers: {
                     "Content-Type": "multipart/form-data",

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import {Link} from "react-router-dom";
+import {api} from '../App.js'
 
 const ReserveHistory = () => {
     const [reservarions, setReservarions] = useState([]);
@@ -10,7 +11,7 @@ const ReserveHistory = () => {
 
     const fetchReserveHistory = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/reservations/cookie", {
+            const response = await axios.get(`${api}/reservations/cookie`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

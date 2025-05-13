@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {FiTrash2} from "react-icons/fi";
+import {api} from '../../App.js'
 
 const AudioBookEditPage = () => {
     const { id } = useParams();
@@ -19,11 +20,11 @@ const AudioBookEditPage = () => {
         const fetchBookDetails = async () => {
             try {
                 setIsLoading(true);
-                const response = await axios.get(`http://localhost:8080/books/${id}`);
+                const response = await axios.get(`${api}/books/${id}`);
                 setBook(response.data);
 
                 // Получение существующих аудиофайлов
-                const filesResponse = await axios.get(`http://localhost:8080/books/${id}/audio`);
+                const filesResponse = await axios.get(`${api}/books/${id}/audio`);
                 setAudioFiles(filesResponse.data || []);
             } catch (err) {
                 setError('Ошибка при загрузке данных о книге: ' + err.message);
@@ -56,7 +57,7 @@ const AudioBookEditPage = () => {
 
         try {
             // Отправка запроса с отслеживанием прогресса
-            const response = await axios.post(`http://localhost:8080/books/${id}/audio/upload`, formData, {
+            const response = await axios.post(`${api}/books/${id}/audio/upload`, formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -72,7 +73,7 @@ const AudioBookEditPage = () => {
             })
 
             if (response.status === 200) {
-                const filesResponse = await axios.get(`http://localhost:8080/books/${id}/audio`);
+                const filesResponse = await axios.get(`${api}/books/${id}/audio`);
                 setAudioFiles(filesResponse.data || []);
                 setSuccess('Файлы успешно загружены!');
                 setNewChapterTitle(''); // Сбросить поле названия главы
@@ -96,7 +97,7 @@ const AudioBookEditPage = () => {
 
         try {
             setIsLoading(true);
-            await axios.delete(`http://localhost:8080/books/${id}/audio/${fileId}`);
+            await axios.delete(`${api}/books/${id}/audio/${fileId}`);
 
             // Обновление списка файлов
             const updatedFiles = audioFiles.filter(file => file.id !== fileId);
@@ -113,7 +114,7 @@ const AudioBookEditPage = () => {
     const handleReorderFiles = async (fileId, newOrder) => {
         try {
             setIsLoading(true);
-            await axios.put(`http://localhost:8080/books/${id}/audio/${fileId}/reorder`, { newOrder }, {
+            await axios.put(`${api}/books/${id}/audio/${fileId}/reorder`, { newOrder }, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -121,7 +122,7 @@ const AudioBookEditPage = () => {
             });
 
             // Обновление списка файлов
-            const filesResponse = await axios.get(`http://localhost:8080/books/${id}/audio`);
+            const filesResponse = await axios.get(`${api}/books/${id}/audio`);
             setAudioFiles(filesResponse.data || []);
             setSuccess('Порядок файлов обновлен!');
         } catch (err) {
@@ -137,7 +138,7 @@ const AudioBookEditPage = () => {
 
         try {
             setIsLoading(true);
-            await axios.put(`http://localhost:8080/books/${id}/audio/${fileId}/reorder`, { "new_order": newOrder }, {
+            await axios.put(`${api}/books/${id}/audio/${fileId}/reorder`, { "new_order": newOrder }, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -167,7 +168,7 @@ const AudioBookEditPage = () => {
     const handleUpdateChapterTitle = async (fileId, newTitle) => {
         try {
             setIsLoading(true);
-            await axios.put(`http://localhost:8080/books/${id}/audio/${fileId}`, {
+            await axios.put(`${api}/books/${id}/audio/${fileId}`, {
                 chapter_title: newTitle
             });
 
@@ -319,7 +320,7 @@ const AudioBookEditPage = () => {
 
                                     <div className="flex items-center space-x-2">
                                         <audio controls className="h-8 w-48 md:w-64">
-                                            <source src={`http://localhost:8080/books/audio/${file.id}`} type="audio/mpeg" />
+                                            <source src={`${api}/books/audio/${file.id}`} type="audio/mpeg" />
                                             Ваш браузер не поддерживает аудиоэлемент.
                                         </audio>
 

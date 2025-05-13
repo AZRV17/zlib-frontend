@@ -3,13 +3,14 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { Download, Upload } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
+import {api} from '../../App.js'
 
 const BackupRestorePage = () => {
     const fileInputRef = useRef(null);
 
     const createBackup = async () => {
         try {
-            const response = await axios.post(`http://localhost:8080/backup/backup`, {}, {
+            const response = await axios.post(`${api}/backup/backup`, {}, {
                 withCredentials: true,
                 responseType: 'blob',
             });
@@ -42,7 +43,7 @@ const BackupRestorePage = () => {
         formData.append('backup', file);
 
         try {
-            const response = await axios.post(`http://localhost:8080/backup/restore`, formData, {
+            const response = await axios.post(`${api}/backup/restore`, formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',

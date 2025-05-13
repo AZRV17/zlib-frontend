@@ -5,6 +5,7 @@ import EpubReader from '../components/EpubReader';
 import { toast } from 'react-toastify';
 import { Book } from "epubjs";
 import {FiCrosshair, FiMoon, FiSun, FiX} from "react-icons/fi";
+import {api} from '../App.js'
 
 const ReadPage = () => {
     const { id } = useParams();
@@ -24,7 +25,7 @@ const ReadPage = () => {
 
         const fetchEpub = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/books/${id}/download`, {
+                const response = await axios.get(`${api}/books/${id}/download`, {
                     withCredentials: true,
                     responseType: 'blob'
                 });
@@ -61,7 +62,7 @@ const ReadPage = () => {
     useEffect(() => {
         const fetchBookDetails = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/books/${id}`, {
+                const response = await axios.get(`${api}/books/${id}`, {
                     withCredentials: true
                 });
                 setBookDetails(response.data);

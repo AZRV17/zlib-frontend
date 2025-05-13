@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import {api} from '../../App.js'
+
 
 const ResetPasswordForm = ({ onBackToLogin }) => {
     const [searchParams] = useSearchParams();
@@ -13,7 +15,7 @@ const ResetPasswordForm = ({ onBackToLogin }) => {
     useEffect(() => {
         const validateToken = async () => {
             try {
-                await axios.get(`http://localhost:8080/users/reset-password?token=${token}`);
+                await axios.get(`${api}/users/reset-password?token=${token}`);
 
 
             } catch (error) {
@@ -29,7 +31,7 @@ const ResetPasswordForm = ({ onBackToLogin }) => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:8080/users/reset-password',
+            const response = await axios.post(`${api}/users/reset-password`,
                 { token, new_password: newPassword },
                 { headers: { 'Content-Type': 'application/json' } }
             );

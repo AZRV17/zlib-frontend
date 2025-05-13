@@ -9,6 +9,7 @@ import {Publisher} from "../../models/publisher";
 import {toast, ToastContainer} from "react-toastify";
 import {Download} from "lucide-react";
 import {FiUpload} from "react-icons/fi";
+import {api} from '../../App.js'
 
 const AdminPublishersPage = () => {
     const [publishers, setPublishers] = useState([]);
@@ -18,7 +19,7 @@ const AdminPublishersPage = () => {
     // Fetch authors data
     const fetchPublishers = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/publishers/", {
+            const response = await axios.get(`${api}/publishers/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -38,7 +39,7 @@ const AdminPublishersPage = () => {
     // Delete author
     const handleDeleteGenre = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/publishers/${id}`, {
+            await axios.delete(`${api}/publishers/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -62,7 +63,7 @@ const AdminPublishersPage = () => {
 
     const handleExportCSV = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/publishers/export", {
+            const response = await axios.get(`${api}/publishers/export`, {
                 withCredentials: true,
                 responseType: 'blob',
             });
@@ -100,7 +101,7 @@ const AdminPublishersPage = () => {
         formData.append("csv", file);
 
         try {
-            const response = await axios.post("http://localhost:8080/publishers/import", formData, {
+            const response = await axios.post(`${api}/publishers/import`, formData, {
                 withCredentials: true,
                 headers: {
                     "Content-Type": "multipart/form-data",

@@ -4,6 +4,7 @@ import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import {AiFillHeart} from "react-icons/ai";
 import {FiHeart} from "react-icons/fi";
+import {api} from '../App.js'
 
 const FavoriteBooks = () => {
     const [favorite, setFavorite] = useState([]);
@@ -12,7 +13,7 @@ const FavoriteBooks = () => {
     // Fetch favorite books
     const fetchFavoriteBooks = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/favorites/cookie', {
+            const response = await axios.get(`${api}/favorites/cookie`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,7 +36,7 @@ const FavoriteBooks = () => {
 
     const removeFromFavorites = async (bookId) => {
         try {
-            await axios.delete(`http://localhost:8080/favorites/cookie/${bookId}`, {
+            await axios.delete(`${api}/favorites/cookie/${bookId}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

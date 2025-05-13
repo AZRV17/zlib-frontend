@@ -7,6 +7,7 @@ import {Book} from "../../models/book";
 import {Genre} from "../../models/genre";
 import {Publisher} from "../../models/publisher";
 import {UniqueCode} from "../../models/uniqueCode";
+import {api} from '../../App.js'
 
 const AdminUniqueCodesPage = () => {
     const [uniqueCode, setUniqueCode] = useState([]);
@@ -15,7 +16,7 @@ const AdminUniqueCodesPage = () => {
     // Fetch authors data
     const fetchUniqueCode = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/unique-codes/", {
+            const response = await axios.get(`${api}/unique-codes/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,7 +38,7 @@ const AdminUniqueCodesPage = () => {
     // Delete author
     const handleDeleteUniqueCode = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/unique-codes/${id}`, {
+            await axios.delete(`${api}/unique-codes/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

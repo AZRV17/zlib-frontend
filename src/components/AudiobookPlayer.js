@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import {api} from '../App'
 import axios from 'axios';
 import { X, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 
@@ -18,7 +19,7 @@ const AudiobookPlayer = ({ bookId, isOpen, onClose }) => {
     useEffect(() => {
         if (isOpen && bookId) {
             setLoading(true);
-            axios.get(`http://localhost:8080/books/${bookId}/audio`, {
+            axios.get(`${api}/books/${bookId}/audio`, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json' }
             })

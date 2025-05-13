@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UniversalForm from '../../components/forms/UniversalForm';
-import {data} from "autoprefixer";
+import {api} from '../../App.js'
 
 const AuthorFormPage = () => {
     const { id } = useParams();
@@ -18,7 +18,7 @@ const AuthorFormPage = () => {
 
     const fetchAuthor = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/authors/${id}`, {
+            const response = await axios.get(`${api}/authors/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -72,14 +72,14 @@ const AuthorFormPage = () => {
             };
 
             if (isEdit) {
-                await axios.put(`http://localhost:8080/authors/${id}`, dataToSend, {
+                await axios.put(`${api}/authors/${id}`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
             } else {
-                await axios.post('http://localhost:8080/authors/', dataToSend, {
+                await axios.post(`${api}/authors/`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'

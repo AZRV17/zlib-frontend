@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from "../components/Header";
 import axios from "axios";
 import {ToastContainer, toast} from "react-toastify";
+import {api} from '../App.js'
 
 const UserProfile = () => {
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -22,7 +23,7 @@ const UserProfile = () => {
     });
 
     const fetchUser = async () => {
-        await axios.get('http://localhost:8080/users/cookie', {
+        await axios.get(`${api}/users/cookie`, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'
@@ -42,7 +43,7 @@ const UserProfile = () => {
         user.passport_number = parseInt(user.passport_number);
         user.email = newEmail
 
-        const response = await axios.patch('http://localhost:8080/users/cookie', user, {
+        const response = await axios.patch(`${api}/users/cookie`, user, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'
@@ -74,7 +75,7 @@ const UserProfile = () => {
 
     const handleEmailChange = async () => {
         try {
-            const response = await axios.patch('http://localhost:8080/users/cookie', { ...user, email: newEmail }, {
+            const response = await axios.patch(`${api}/users/cookie`, { ...user, email: newEmail }, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -97,7 +98,7 @@ const UserProfile = () => {
     const handleDeleteProfile = async () => {
         try {
             // Отправка запроса на удаление профиля
-            await axios.delete("http://localhost:8080/users/cookie", {
+            await axios.delete("${api}/users/cookie", {
                 withCredentials: true,
                 headers: { "Content-Type": "application/json" },
             });

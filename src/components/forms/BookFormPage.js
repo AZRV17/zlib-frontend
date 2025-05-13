@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UniversalForm from '../../components/forms/UniversalForm';
 import {Book} from "../../models/book";
+import {api} from '../../App.js'
 
 const BookFormPage = () => {
     const { id } = useParams();
@@ -26,7 +27,7 @@ const BookFormPage = () => {
 
     const fetchBook = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/books/${id}`, {
+            const response = await axios.get(`${api}/books/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -51,7 +52,7 @@ const BookFormPage = () => {
 
     const fetchAuthors = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/authors/', {
+            const response = await axios.get(`${api}/authors/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -65,7 +66,7 @@ const BookFormPage = () => {
 
     const fetchGenres = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/genres/', {
+            const response = await axios.get(`${api}/genres/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -79,7 +80,7 @@ const BookFormPage = () => {
 
     const fetchPublishers = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/publishers/', {
+            const response = await axios.get(`${api}/publishers/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -211,9 +212,9 @@ const BookFormPage = () => {
             };
 
             if (isEdit) {
-                await axios.put(`http://localhost:8080/books/${id}`, form, config);
+                await axios.put(`${api}/books/${id}`, form, config);
             } else {
-                await axios.post('http://localhost:8080/books/', form, config);
+                await axios.post(`${api}/books/`, form, config);
             }
 
             navigate('/admin/books');

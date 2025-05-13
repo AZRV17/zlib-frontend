@@ -17,6 +17,9 @@ import {FaNewspaper} from "react-icons/fa";
 import {FaBarcode, FaMasksTheater} from "react-icons/fa6";
 import {BsFillChatTextFill} from "react-icons/bs";
 
+import {api} from '../App.js'
+
+
 const Header = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [role, setRole] = useState("");
@@ -28,7 +31,7 @@ const Header = () => {
 
     const fetchUser = async () => {
         try {
-            return await axios.get("http://localhost:8080/users/cookie", {
+            return await axios.get(`${api}/users/cookie`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -55,7 +58,7 @@ const Header = () => {
 
     const handleLogout = async () => {
         try {
-            const response = await axios.post("http://localhost:8080/users/logout", null, {
+            const response = await axios.post(`${api}/users/logout`, null, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json',

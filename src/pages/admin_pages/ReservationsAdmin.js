@@ -5,6 +5,7 @@ import {Reservation, reservation} from "../../models/reservation";
 import {Link, useNavigate} from "react-router-dom";
 import {ChevronDown, Download} from "lucide-react";
 import {toast} from "react-toastify";
+import {api} from '../../App.js'
 
 const AdminReservationsPage = () => {
     const [reservations, setReservations] = useState([]);
@@ -33,7 +34,7 @@ const AdminReservationsPage = () => {
     // Fetch reservations data
     const fetchReservations = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/reservations/", {
+            const response = await axios.get(`${api}/reservations/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -53,7 +54,7 @@ const AdminReservationsPage = () => {
     // Delete reservation
     const handleDeleteReservation = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/reservations/${id}`, {
+            await axios.delete(`${api}/reservations/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -67,7 +68,7 @@ const AdminReservationsPage = () => {
 
     const confirmEdit = async () => {
         try {
-            await axios.patch(`http://localhost:8080/reservations/${editId}`, {"status": status}, {
+            await axios.patch(`${api}/reservations/${editId}`, {"status": status}, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -86,7 +87,7 @@ const AdminReservationsPage = () => {
 
     const fetchReservation = async (id) => {
         try {
-            const response = await axios.get(`http://localhost:8080/reservations/${id}`, {
+            const response = await axios.get(`${api}/reservations/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -120,7 +121,7 @@ const AdminReservationsPage = () => {
 
     const handleExportCSV = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/reservations/export", {
+            const response = await axios.get(`${api}/reservations/export`, {
                 withCredentials: true,
                 responseType: 'blob',
             });

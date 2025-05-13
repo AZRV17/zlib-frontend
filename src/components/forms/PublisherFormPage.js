@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UniversalForm from '../../components/forms/UniversalForm';
-import {data} from "autoprefixer";
+import {api} from '../../App.js'
 
 const PublisherFormPage = () => {
     const { id } = useParams();
@@ -18,7 +18,7 @@ const PublisherFormPage = () => {
 
     const fetchPublisher = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/publishers/${id}`, {
+            const response = await axios.get(`${api}/publishers/${id}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -45,14 +45,14 @@ const PublisherFormPage = () => {
             const dataToSend = {...formData};
 
             if (isEdit) {
-                await axios.put(`http://localhost:8080/publishers/${id}`, dataToSend, {
+                await axios.put(`${api}/publishers/${id}`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
             } else {
-                await axios.post('http://localhost:8080/publishers/', dataToSend, {
+                await axios.post(`${api}/publishers/`, dataToSend, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'

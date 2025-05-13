@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import {FiMenu, FiPlus} from "react-icons/fi";
+import {api} from '../App.js'
 
 const LibrarianChatPage = () => {
     const [messages, setMessages] = useState([]);
@@ -17,7 +18,7 @@ const LibrarianChatPage = () => {
     // Получение сообщений чата
     const fetchMessages = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8080/chats/${id}/messages`, {
+            const response = await fetch(`${api}/chats/${id}/messages`, {
                 credentials: 'include'
             });
 
@@ -121,7 +122,7 @@ const LibrarianChatPage = () => {
     const fetchAssignedChats = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:8080/librarian/chats/', {
+            const response = await fetch(`${api}/librarian/chats/`, {
                 credentials: 'include'
             });
 
@@ -146,7 +147,7 @@ const LibrarianChatPage = () => {
 
     const fetchUnassignedChats = async () => {
         try {
-            const response = await fetch('http://localhost:8080/librarian/chats/unassigned', {
+            const response = await fetch(`${api}/librarian/chats/unassigned`, {
                 credentials: 'include'
             });
 
@@ -161,7 +162,7 @@ const LibrarianChatPage = () => {
 
     const assignChat = async (chatId) => {
         try {
-            const response = await fetch(`http://localhost:8080/librarian/chats/${chatId}/assign`, {
+            const response = await fetch(`${api}/librarian/chats/${chatId}/assign`, {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -182,7 +183,7 @@ const LibrarianChatPage = () => {
 
     const closeChat = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/librarian/chats/${chatId}/close`, {
+            const response = await fetch(`${api}/librarian/chats/${chatId}/close`, {
                 method: 'POST',
                 credentials: 'include'
             });

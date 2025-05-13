@@ -35,6 +35,8 @@ export const AuthContext = createContext({
     setAuth: () => {},
 });
 
+export const api = "http://localhost:8080";
+
 const AppContent = () => {
     const location = useLocation();
     const [isAuth, setIsAuth] = useState(false);

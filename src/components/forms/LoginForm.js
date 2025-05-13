@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import {api} from '../../App.js'
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ const LoginForm = () => {
                 password: user.password
             }
 
-            const response = await axios.post("http://localhost:8080/users/sign-in-by-email", user, {
+            const response = await axios.post(`${api}/users/sign-in-by-email`, user, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -56,7 +57,7 @@ const LoginForm = () => {
                 }
             }
         } else {
-            const response = await axios.post("http://localhost:8080/users/sign-in-by-login", user, {
+            const response = await axios.post(`${api}/users/sign-in-by-login`, user, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
