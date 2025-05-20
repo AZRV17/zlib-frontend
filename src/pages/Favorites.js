@@ -13,10 +13,10 @@ const FavoriteBooks = () => {
     // Fetch favorite books
     const fetchFavoriteBooks = async () => {
         try {
-            const response = await axios.get(`${api}/favorites/cookie`, {
+            const response = await axios.get(`${api}/favorites/`, {
                 withCredentials: true,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 }
             });
 
@@ -36,7 +36,7 @@ const FavoriteBooks = () => {
 
     const removeFromFavorites = async (bookId) => {
         try {
-            await axios.delete(`${api}/favorites/cookie/${bookId}`, {
+            await axios.delete(`${api}/favorites/${bookId}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

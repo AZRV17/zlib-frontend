@@ -155,7 +155,7 @@ const AudiobookPlayer = ({ bookId, isOpen, onClose }) => {
                     <X size={24} />
                 </button>
 
-                <h2 className="text-2xl font-bold mb-6 pr-8">Audiobook Player</h2>
+                <h2 className="text-2xl font-bold mb-6 pr-8">Аудио Плеер</h2>
 
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
@@ -163,7 +163,7 @@ const AudiobookPlayer = ({ bookId, isOpen, onClose }) => {
                     </div>
                 ) : audioFiles.length === 0 ? (
                     <div className="text-center py-10">
-                        <p className="text-lg text-gray-600">No audio files available for this book.</p>
+                        <p className="text-lg text-gray-600">Нет доступных аудио для данной книги</p>
                     </div>
                 ) : (
                     <>
@@ -175,7 +175,7 @@ const AudiobookPlayer = ({ bookId, isOpen, onClose }) => {
                             {/* Audio element (hidden) */}
                             <audio
                                 ref={audioRef}
-                                src={`http://localhost:8080/books/audio/${audioFiles[currentTrackIndex]?.id}`}
+                                src={`${api}/books/audio/${audioFiles[currentTrackIndex]?.id}`}
                                 preload="metadata"
                             />
 

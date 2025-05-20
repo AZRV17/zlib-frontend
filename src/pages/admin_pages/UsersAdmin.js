@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import UniversalTable from "../../components/UniversalTable"; // Import the universal table component
+import UniversalTable from "../../components/UniversalTable";
 import { useNavigate } from "react-router-dom";
 import {User} from "../../models/user";
 import {ChevronDown} from "lucide-react";
@@ -42,12 +42,6 @@ const AdminUsersPage = () => {
             });
             const usersData = response.data.map(user => {
 
-                // let books = author.books.map(book => {
-                //     return book.id
-                // })
-                //
-                // author.books = books
-
                 return User.fromJson(user)
             });
 
@@ -75,7 +69,6 @@ const AdminUsersPage = () => {
         }
     };
 
-    // Delete author
     const handleDeleteAuthor = async (id) => {
         try {
             await axios.delete(`${api}/users/${id}`, {
@@ -109,7 +102,6 @@ const AdminUsersPage = () => {
         setIsEdit(false)
     }
 
-    // Edit author
     const handleEditAuthor = (id) => {
         setEditId(id)
         fetchUser(id).then(r => {
@@ -117,7 +109,6 @@ const AdminUsersPage = () => {
         })
     };
 
-    // Create new author
     const handleCreateAuthor = () => {
         navigate("/admin/user/new");
     };
@@ -126,7 +117,6 @@ const AdminUsersPage = () => {
         fetchUsers();
     }, []);
 
-    // Define the columns for the table
     const columns = [
         { key: "id", label: "ID" },
         {key: "login", label: "Логин"},

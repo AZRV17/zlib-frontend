@@ -48,9 +48,9 @@ const LoginForm = () => {
             })
 
             if (response && response.status === 200) {
-                if (response.data.role === "admin") {
+                if (response.data.user.role === "admin") {
                     window.location.href = "/admin/users";
-                } else if (response.data.role === "librarian") {
+                } else if (response.user.data.role === "librarian") {
                     window.location.href = "/admin/authors";
                 } else {
                     window.location.href = "/";
@@ -67,9 +67,9 @@ const LoginForm = () => {
             })
 
             if (response && response.status === 200) {
-                if (response.data.role === "admin") {
+                if (response.data.user.role === "admin") {
                     window.location.href = "/admin/users";
-                } else if (response.data.role === "librarian") {
+                } else if (response.data.user.role === "librarian") {
                     window.location.href = "/admin/authors";
                 } else {
                     window.location.href = "/";

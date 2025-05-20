@@ -119,7 +119,7 @@ const ReadPage = () => {
                     </div>
                 ) : (
                     <div className="text-center text-red-600">
-                        Не удалось загрузить книгу
+                        Электронный формат данной книги недоступен
                     </div>
                 )}
             </div>

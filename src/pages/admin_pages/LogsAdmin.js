@@ -20,13 +20,6 @@ const AdminLogsPage = () => {
                 }
             });
             const logsData = response.data.map(log => {
-
-                // let books = author.books.map(book => {
-                //     return book.id
-                // })
-                //
-                // author.books = books
-
                 return Log.fromJson(log)
             });
 

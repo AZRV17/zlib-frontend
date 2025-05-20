@@ -11,7 +11,7 @@ const ReserveHistory = () => {
 
     const fetchReserveHistory = async () => {
         try {
-            const response = await axios.get(`${api}/reservations/cookie`, {
+            const response = await axios.get(`${api}/reservations/my`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

@@ -31,7 +31,7 @@ const Header = () => {
 
     const fetchUser = async () => {
         try {
-            return await axios.get(`${api}/users/cookie`, {
+            return await axios.get(`${api}/users/me`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'

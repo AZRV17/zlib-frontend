@@ -17,12 +17,12 @@ const Books = () => {
     const [selectedGenre, setSelectedGenre] = useState(null);
     const [authors, setAuthors] = useState([]);
     const [selectedAuthor, setSelectedAuthor] = useState(null);
-    const [yearRange, setYearRange] = useState([1900, new Date().getFullYear()]);
+    const [yearRange, setYearRange] = useState([1700, new Date().getFullYear()]);
     const [sortOption, setSortOption] = useState('title');
-    const [sortLabel, setSortLabel] = useState('Название');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [sortLabel, setSortLabel] = useState('Название (А-Я)');
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-    const [filteredBooks, setFilteredBooks] = useState([]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -37,16 +37,39 @@ const Books = () => {
         [searchQuery]
     );
 
-    const fetchBooks = async (page, searchTerm = '') => {
+    const fetchBooks = async (page = 1) => {
         setIsLoading(true);
         try {
             let url = `${api}/books/pagination?page=${page}`;
-            if (searchTerm) {
-                url += `&query=${encodeURIComponent(searchTerm)}`;
+            
+            // Добавляем параметры фильтрации и сортировки
+            if (debouncedSearchQuery) {
+                url += `&query=${encodeURIComponent(debouncedSearchQuery)}`;
             }
+            
+            if (selectedAuthor && selectedAuthor.id && selectedAuthor.name !== "Все авторы") {
+                url += `&author_id=${selectedAuthor.id}`;
+            }
+            
+            if (selectedGenre && selectedGenre.id && selectedGenre.name !== "Все жанры") {
+                url += `&genre_id=${selectedGenre.id}`;
+            }
+            
+            url += `&year_start=${yearRange[0]}`;
+            url += `&year_end=${yearRange[1]}`;
+            url += `&sort_by=${sortOption}`;
+            url += `&sort_order=${sortOrder}`;
 
             const response = await axios.get(url);
             const { books: booksData, totalPages: total, currentPage: current } = response.data;
+
+            // Проверяем, что сервер возвращает корректное количество книг
+            if (!Array.isArray(booksData) || booksData.length === 0) {
+                setBooks([]);
+                setTotalPages(1);
+                setCurrentPage(1);
+                return;
+            }
 
             const processedBooks = booksData.map(bookData => {
                 let book = Book.fromJson(bookData);
@@ -56,14 +79,14 @@ const Books = () => {
                 return book;
             });
 
+            console.log(`Получено ${processedBooks.length} книг на странице ${current} из ${total}`);
+
             setBooks(processedBooks);
-            setFilteredBooks(processedBooks); // Добавьте эту строку
             setTotalPages(total);
             setCurrentPage(current);
         } catch (err) {
             console.log(err);
             setBooks([]);
-            setFilteredBooks([]); // И эту тоже
             setTotalPages(1);
         } finally {
             setIsLoading(false);
@@ -89,55 +112,16 @@ const Books = () => {
     };
 
     useEffect(() => {
-        fetchAuthors();
-    }, [books, selectedGenre, selectedAuthor, yearRange]);
-
-    useEffect(() => {
-        fetchBooks(currentPage, debouncedSearchQuery);
-    }, [currentPage, debouncedSearchQuery]);
-
-    useEffect(() => {
         fetchGenres();
+        fetchAuthors();
     }, []);
 
     useEffect(() => {
-        if (books.length > 0) {
-            const filtered = books.filter(book => {
-                // Извлекаем год из даты
-                const year = new Date(book.year_of_publication).getFullYear();
-                const minYear = yearRange[0];
-                const maxYear = yearRange[1];
-
-                console.log(`Книга: ${book.title}, Извлеченный год: ${year}`);
-
-                const matchesGenre = !selectedGenre || selectedGenre.name === "Все жанры" || book.genre?.name === selectedGenre.name;
-                const matchesAuthor = !selectedAuthor || selectedAuthor.name === "Все авторы" || book.author?.name === selectedAuthor.name;
-                const matchesYear = year >= minYear && year <= maxYear;
-
-                return matchesGenre && matchesAuthor && matchesYear;
-            });
-
-            const sorted = [...filtered].sort((a, b) => {
-                switch (sortOption) {
-                    case 'title':
-                        return a.title.localeCompare(b.title);
-                    case 'rating':
-                        return b.rating - a.rating;
-                    case 'publicationDate':
-                    case 'publicationYear':
-                        return new Date(b.year_of_publication).getFullYear() - new Date(a.year_of_publication).getFullYear();
-                    case 'author':
-                        return a.author?.name.localeCompare(b.author?.name);
-                    default:
-                        return 0;
-                }
-            });
-
-            setFilteredBooks(sorted);
-        }
-    }, [books, selectedGenre, selectedAuthor, yearRange, sortOption]);
+        fetchBooks(currentPage);
+    }, [currentPage, debouncedSearchQuery, selectedGenre, selectedAuthor, yearRange, sortOption, sortOrder]);
 
     const handlePageChange = (newPage) => {
+        // Убедимся, что не переходим на пустую страницу
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
             window.scrollTo(0, 0);
@@ -148,32 +132,25 @@ const Books = () => {
         setSearchQuery(e.target.value);
     };
 
-    // const filteredBooks = books.filter(book => {
-    //     const matchesGenre = !selectedGenre || selectedGenre.name === "Все жанры" || book.genre?.name === selectedGenre.name;
-    //     const matchesAuthor = !selectedAuthor || selectedAuthor.name === "Все авторы" || book.author?.name === selectedAuthor.name;
-    //     const matchesYear = !book.publicationYear || (book.publicationYear >= yearRange[0] && book.publicationYear <= yearRange[1]);
-    //
-    //     return matchesGenre && matchesAuthor && matchesYear;
-    // });
-
-    // const sortedBooks = filteredBooks.sort((a, b) => {
-    //     if (sortOption === 'title') {
-    //         return a.title.localeCompare(b.title);
-    //     } else if (sortOption === 'rating') {
-    //         return b.rating - a.rating;
-    //     } else if (sortOption === 'publicationDate') {
-    //         return new Date(b.publicationDate) - new Date(a.publicationDate);
-    //     } else if (sortOption === 'author') {
-    //         return a.author.localeCompare(b.author);
-    //     } else if (sortOption === 'publicationYear') {
-    //         return a.publicationYear - b.publicationYear;
-    //     }
-    //     return 0;
-    // });
-
     const handleSortChange = (option) => {
         setSortOption(option.value);
         setSortLabel(option.label);
+        setSortOrder(option.order);
+    };
+
+    const handleGenreChange = (genre) => {
+        setSelectedGenre(genre);
+        setCurrentPage(1);
+    };
+
+    const handleAuthorChange = (author) => {
+        setSelectedAuthor(author);
+        setCurrentPage(1);
+    };
+
+    const handleYearRangeChange = (values) => {
+        setYearRange(values);
+        setCurrentPage(1);
     };
 
     const getPageNumbers = () => {
@@ -217,9 +194,9 @@ const Books = () => {
                     <div className="flex-1 min-w-[200px]">
                         <DropdownList
                             placeholder="Выберите жанр"
-                            data={[{ name: "Все жанры" }, ...genres]}
+                            data={[{ id: null, name: "Все жанры" }, ...genres]}
                             value={selectedGenre}
-                            onChange={setSelectedGenre}
+                            onChange={handleGenreChange}
                             textField="name"
                             valueField="name"
                             className="h-full"
@@ -231,9 +208,9 @@ const Books = () => {
                     <div className="flex-1 min-w-[200px]">
                         <DropdownList
                             placeholder="Выберите автора"
-                            data={[{ name: "Все авторы", lastname: "Все авторы" }, ...authors]}
+                            data={[{ id: null, name: "Все авторы", lastname: "Все авторы" }, ...authors]}
                             value={selectedAuthor}
-                            onChange={setSelectedAuthor}
+                            onChange={handleAuthorChange}
                             textField="lastname"
                             valueField="name"
                             className="h-full"
@@ -246,12 +223,10 @@ const Books = () => {
                         <label className="block font-medium text-gray-700 mb-2">Год публикации</label>
                         <Range
                             step={1}
-                            min={1900}
+                            min={1700}
                             max={new Date().getFullYear()}
                             values={yearRange}
-                            onChange={(values) => {
-                                setYearRange(values)
-                            }}
+                            onChange={handleYearRangeChange}
                             renderTrack={({ props, children }) => (
                                 <div
                                     {...props}
@@ -289,11 +264,14 @@ const Books = () => {
                     <div className="flex-1 min-w-[200px]">
                         <DropdownList
                             data={[
-                                { label: "Название", value: 'title' },
-                                { label: "Рейтинг", value: 'rating' },
-                                { label: "Дата публикации", value: 'publicationDate' }
+                                { label: "Название (А-Я)", value: 'title', order: 'asc' },
+                                { label: "Название (Я-А)", value: 'title', order: 'desc' },
+                                { label: "Рейтинг (убыв.)", value: 'rating', order: 'desc' },
+                                { label: "Рейтинг (возр.)", value: 'rating', order: 'asc' },
+                                { label: "Новые сначала", value: 'year', order: 'desc' },
+                                { label: "Старые сначала", value: 'year', order: 'asc' }
                             ]}
-                            value={{ label: sortLabel, value: sortOption }}
+                            value={{ label: sortLabel, value: sortOption, order: sortOrder }}
                             onChange={handleSortChange}
                             textField="label"
                             valueField="value"
@@ -312,9 +290,9 @@ const Books = () => {
                             <div className="absolute border-4 border-blue-500 rounded-full w-full h-full animate-spin border-t-transparent"></div>
                         </div>
                     </div>
-                ) : filteredBooks.length > 0 ? (
+                ) : books.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredBooks.map(book => (
+                        {books.map(book => (
                             <BookCard key={book.id} book={book} onSelectBook={setSelectedBook} />
                         ))}
                     </div>
@@ -346,8 +324,8 @@ const Books = () => {
                                     <React.Fragment key={index}>
                                         {number === '...' ? (
                                             <span className="flex items-center justify-center w-10 text-gray-500">
-                                            <MoreHorizontal className="w-5 h-5" />
-                                        </span>
+                                                <MoreHorizontal className="w-5 h-5" />
+                                            </span>
                                         ) : (
                                             <button
                                                 onClick={() => handlePageChange(number)}

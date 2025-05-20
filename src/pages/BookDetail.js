@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import {FaStar} from "react-icons/fa";
 import {Review} from "../models/review";
 import ReviewCard from "../components/ReviewCard";
-import {AudioLinesIcon, FileAudio} from "lucide-react";
+import {AudioLinesIcon} from "lucide-react";
 import AudiobookPlayer from "../components/AudiobookPlayer"; // Import the new component
 import {api} from '../App.js'
 
@@ -20,13 +20,12 @@ const BookDetail = () => {
     const [reviews, setReviews] = useState([]);
     const [newReview, setNewReview] = useState("");
     const [rating, setRating] = useState(0);
-    const [showAudioPlayer, setShowAudioPlayer] = useState(false); // State for controlling audio modal
+    const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
     const scrollToReview = (reviewId) => {
         const element = document.getElementById(`review-${reviewId}`);
         if (element) {
-            // Добавляем отступ сверху для лучшего позиционирования
-            const offset = 100; // отступ в пикселях
+            const offset = 100;
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - offset;
 
@@ -35,23 +34,20 @@ const BookDetail = () => {
                 behavior: 'smooth'
             });
 
-            // Set yellow background initially
-            element.style.backgroundColor = "rgb(254, 243, 199)"; // yellow-50
+            element.style.backgroundColor = "rgb(254, 243, 199)";
             element.style.transition = "background-color .5s ease-in";
 
-            // Start fade-out effect after 2 seconds
             setTimeout(() => {
                 let opacity = 1.0;
                 const fadeInterval = setInterval(() => {
                     opacity -= 0.5;
                     element.style.backgroundColor = `rgba(254, 243, 199, ${opacity})`;
 
-                    // Stop interval when opacity is close to 0
                     if (opacity <= 0) {
                         clearInterval(fadeInterval);
-                        element.style.backgroundColor = "white"; // reset to white background
+                        element.style.backgroundColor = "white";
                     }
-                }, 50); // Adjust this value for a faster or slower fade
+                }, 50);
             }, 2000);
 
             element.removeAttribute('id');
@@ -80,7 +76,7 @@ const BookDetail = () => {
 
     const check_is_favorite = async () => {
         try {
-            const response = await axios.get(`${api}/favorites/cookie`, {
+            const response = await axios.get(`${api}/favorites/`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -115,7 +111,7 @@ const BookDetail = () => {
 
     const add_to_favorites = async () => {
         try {
-            const response = await axios.post(`${api}/favorites/cookie`, { "book_id": parseInt(id) }, {
+            const response = await axios.post(`${api}/favorites/`, { "book_id": parseInt(id) }, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -133,7 +129,7 @@ const BookDetail = () => {
 
     const remove_from_favorites = async () => {
         try {
-            await axios.delete(`${api}/favorites/cookie/${parseInt(id)}`, {
+            await axios.delete(`${api}/favorites/${parseInt(id)}`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -171,14 +167,13 @@ const BookDetail = () => {
         try {
             const response = await axios.get(`${api}/books/${id}/download`, {
                 withCredentials: true,
-                responseType: 'blob' // Говорим axios, что нам нужен бинарный файл
+                responseType: 'blob'
             });
 
             if (response.status === 200) {
                 const url = window.URL.createObjectURL(response.data);
                 const link = document.createElement('a');
 
-                // Получаем имя файла из заголовка, если сервер его отправляет
                 let filename = `book_${new Date().toISOString().replace(/[:.]/g, '-')}.epub`;
                 const contentDisposition = response.headers['content-disposition'];
                 if (contentDisposition) {
@@ -216,7 +211,7 @@ const BookDetail = () => {
                 setRating(0);
                 fetchReviews();
 
-                const newReviewId = response.data.id; // предполагая, что сервер возвращает id нового отзыва
+                const newReviewId = response.data.id;
                 setTimeout(() => scrollToReview(newReviewId), 100);
             }
         } catch (err) {
@@ -233,12 +228,10 @@ const BookDetail = () => {
 
     const handleRating = (rate) => setRating(rate);
 
-    // Open audio player modal
     const openAudioPlayer = () => {
         setShowAudioPlayer(true);
     };
 
-    // Close audio player modal
     const closeAudioPlayer = () => {
         setShowAudioPlayer(false);
     };
@@ -251,7 +244,6 @@ const BookDetail = () => {
         const hash = window.location.hash;
         if (hash && hash.startsWith('#review-')) {
             const reviewId = hash.replace('#review-', '');
-            // Даем время на загрузку отзывов
             setTimeout(() => scrollToReview(reviewId), 500);
         }
     }, [id]);

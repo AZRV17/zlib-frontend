@@ -104,18 +104,14 @@ const AdminReservationsPage = () => {
         }
     };
 
-    // Edit reservation
     const handleEditReservation = (id) => {
-        // navigate(`/admin/reservations/edit/${id}`);
         setEditId(id)
         fetchReservation(id).then(r => {
             setIsEdit(true)
         })
     };
 
-    // Create new reservation
     const handleCreateReservation = () => {
-        // navigate("/admin/reservations/new");
         setIsEdit(true);
     };
 

@@ -23,7 +23,7 @@ const UserProfile = () => {
     });
 
     const fetchUser = async () => {
-        await axios.get(`${api}/users/cookie`, {
+        await axios.get(`${api}/users/me`, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'
@@ -43,7 +43,7 @@ const UserProfile = () => {
         user.passport_number = parseInt(user.passport_number);
         user.email = newEmail
 
-        const response = await axios.patch(`${api}/users/cookie`, user, {
+        const response = await axios.put(`${api}/users/me`, user, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'
@@ -52,6 +52,7 @@ const UserProfile = () => {
 
         if (response.status === 200) {
             setIsEditing(false);
+            fetchUser()
         } else {
             fetchUser();
             alert("Произошла ошибка при обновлении профиля");
@@ -75,7 +76,7 @@ const UserProfile = () => {
 
     const handleEmailChange = async () => {
         try {
-            const response = await axios.patch(`${api}/users/cookie`, { ...user, email: newEmail }, {
+            const response = await axios.patch(`${api}/users/me/email`, { user_id: user.id, email: newEmail }, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json'
@@ -98,7 +99,7 @@ const UserProfile = () => {
     const handleDeleteProfile = async () => {
         try {
             // Отправка запроса на удаление профиля
-            await axios.delete("${api}/users/cookie", {
+            await axios.delete(`${api}/users/me`, {
                 withCredentials: true,
                 headers: { "Content-Type": "application/json" },
             });

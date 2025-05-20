@@ -13,7 +13,6 @@ const AdminUniqueCodesPage = () => {
     const [uniqueCode, setUniqueCode] = useState([]);
     const navigate = useNavigate();
 
-    // Fetch authors data
     const fetchUniqueCode = async () => {
         try {
             const response = await axios.get(`${api}/unique-codes/`, {
@@ -35,7 +34,6 @@ const AdminUniqueCodesPage = () => {
         }
     };
 
-    // Delete author
     const handleDeleteUniqueCode = async (id) => {
         try {
             await axios.delete(`${api}/unique-codes/${id}`, {
@@ -50,12 +48,10 @@ const AdminUniqueCodesPage = () => {
         }
     };
 
-    // Edit author
     const handleEditUniqueCode = (id) => {
         navigate(`/admin/unique-codes/edit/${id}`);
     };
 
-    // Create new author
     const handleCreateUniqueCode = () => {
         navigate("/admin/unique-codes/new");
     };
@@ -64,7 +60,6 @@ const AdminUniqueCodesPage = () => {
         fetchUniqueCode();
     }, []);
 
-    // Define the columns for the table
     const columns = [
         { key: "id", label: "ID" },
         { key: "code", label: "Код" },

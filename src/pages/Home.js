@@ -18,6 +18,7 @@ const Home = () => {
     const [genres, setGenres] = React.useState([]);
     const [showScrollButton, setShowScrollButton] = useState(true);
     const [selectedBook, setSelectedBook] = useState(null);
+    const [topBooks, setTopBooks] = useState([])
 
     const fetch_books = async () => {
         await axios.get(`${api}/books/`).then(
@@ -31,6 +32,25 @@ const Home = () => {
                         console.log(book.picture)
                     }
                     setBooks(books => [...books, book]);
+                }
+            }
+        ).catch(err => {
+            console.log(err)
+        })
+    }
+
+    const fetch_top_books = async () => {
+        await axios.get(`${api}/books/top`).then(
+            response => {
+                setTopBooks(books => []);
+                for (let i = 0; i < response.data.length; i++) {
+                    let book = Book.fromJson(response.data[i]);
+
+                    if (book.picture === null || book.picture === "") {
+                        book.picture = "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg"
+                        console.log(book.picture)
+                    }
+                    setTopBooks(books => [...books, book]);
                 }
             }
         ).catch(err => {
@@ -73,6 +93,7 @@ const Home = () => {
     };
 
     useEffect(() => {
+        fetch_top_books()
         fetch_books()
         fetch_authors()
         fetch_genres()
@@ -149,10 +170,10 @@ const Home = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-                        {[0, 1, 2].map((index) => (
+                        {topBooks.map((book, index) => (
                             <Link
-                                key={index}
-                                to={books[index] ? `/books/${books[index].id}` : '#'}
+                                key={book.id}
+                                to={book.id ? `/books/${book.id}` : '#'}
                                 className="relative group"
                             >
                                 <div className="relative overflow-hidden rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-105">
@@ -164,8 +185,8 @@ const Home = () => {
 
                                     <img
                                         className="w-full h-[400px] object-cover transform group-hover:scale-110 transition-transform duration-500"
-                                        src={books[index]?.picture || "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg"}
-                                        alt={books[index]?.title || "Книга"}
+                                        src={book?.picture || "https://img.freepik.com/premium-vector/blank-cover-book-magazine-template_212889-605.jpg"}
+                                        alt={book?.title || "Книга"}
                                     />
 
                                     <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white">
@@ -177,10 +198,10 @@ const Home = () => {
                                         {index + 1}
                                     </span>
                                         <h3 className="text-xl md:text-2xl font-bold mb-2">
-                                            {books[index]?.title || "Загрузка..."}
+                                            {book?.title || "Загрузка..."}
                                         </h3>
                                         <p className="text-sm md:text-base opacity-75">
-                                            {books[index]?.author?.name || ""} {books[index]?.author?.lastname || ""}
+                                            {book?.author?.name || ""} {book?.author?.lastname || ""}
                                         </p>
                                     </div>
                                 </div>
@@ -203,11 +224,11 @@ const Home = () => {
                     </Link>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {books.map(book => (
+                        {books.slice(0, 8).map(book => (
                             <BookCard
                                 key={book.id}
                                 book={book}
-                                onSelectBook={() => setSelectedBook(book)} // Исправлено
+                                onSelectBook={() => setSelectedBook(book)}
                             />
                         ))}
                     </div>
